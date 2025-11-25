@@ -1,0 +1,77 @@
+{
+  "name": "threat-dragon",
+  "version": "2.5.0",
+  "appBundleId": "org.owasp.threatdragon",
+  "private": true,
+  "scripts": {
+    "audit": "npm-run-all -c audit:server audit:site",
+    "audit:server": "cd td.server && npm run audit",
+    "audit:site": "cd td.vue && npm run audit",
+    "build": "npm-run-all build:vue build:server",
+    "build:desktop": "cd td.vue && npm run build:desktop",
+    "build:server": "cd td.server && npm run build",
+    "build:vue": "cd td.vue && npm run build",
+    "clean": "npm-run-all clean:server clean:vue clean:root",
+    "clean:server": "cd td.server && npm run clean",
+    "clean:root": "rimraf node_modules/",
+    "clean:vue": "cd td.vue && npm run clean",
+    "dev:vue": "cd td.vue && npm run dev",
+    "dev:server": "cd td.server && npm run dev",
+    "pretest": "npm-run-all pretest:server pretest:site",
+    "pretest:server": "cd td.server && npm run pretest",
+    "pretest:site": "cd td.vue && npm run pretest",
+    "postinstall": "cd td.server && npm install && cd ../td.vue && npm install",
+    "start": "npm-run-all build:vue build:server start:server start:site",
+    "start:desktop": "cd td.vue && npm run start:desktop",
+    "start:server": "cd td.server && npm run start:server",
+    "start:site": "cd td.vue && npm run start:serve",
+    "stop": "npm-run-all stop:site stop:server",
+    "stop:server": "cd td.server && npm run stop:server",
+    "stop:site": "cd td.vue && npm run stop:serve",
+    "test": "npm-run-all build pretest test:site test:server test:desktop",
+    "test:desktop": "cd td.vue && npm run test:desktop",
+    "test:e2e:desktop": "cd td.vue && npm run build:desktop -- --publish=never && npm run test:e2e:desktop",
+    "test:server": "cd td.server && npm run test:unit",
+    "test:site": "cd td.vue && npm run test:unit",
+    "test:vue": "cd td.vue && npm run test:vue"
+  },
+  "keywords": [
+    "threat dragon",
+    "OWASP",
+    "threat modeling",
+    "STRIDE",
+    "LINDDUN",
+    "CIA",
+    "DIE",
+    "PLOT4ai"
+  ],
+  "description": "OWASP Threat Dragon - a free, open source threat modeling tool",
+  "author": {
+    "name": "OWASP Threat Dragon",
+    "email": "jon.gadsden@owasp.org",
+    "url": "https://owasp.org/www-project-threat-dragon/"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://owasp.org/www-project-threat-dragon/",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/OWASP/threat-dragon.git"
+  },
+  "bugs": {
+    "email": "jon.gadsden@owasp.org",
+    "url": "https://github.com/OWASP/threat-dragon/issues"
+  },
+  "devDependencies": {
+    "@wdio/cli": "^9.12.2",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^6.1.2"
+  },
+  "overrides": {
+    "ansi-regex@>2.1.1 <5.0.1": ">=5.0.1",
+    "glob-parent@<5.1.2": ">=5.1.2",
+    "micromatch": ">=4.0.8",
+    "minimatch@<3.0.5": ">=3.0.5",
+    "tar-fs": ">=3.0.8",
+    "ws": ">=8.18.0"
+  }
+}
