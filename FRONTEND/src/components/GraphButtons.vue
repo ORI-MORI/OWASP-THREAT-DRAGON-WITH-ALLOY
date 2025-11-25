@@ -52,10 +52,7 @@
             </b-dropdown-item>
         </b-dropdown>
 
-        <td-form-button
-            :onBtnClick="closeDiagram"
-            icon="times"
-            :text="$t('forms.close')" />
+
 
         <td-form-button
             :onBtnClick="verify"

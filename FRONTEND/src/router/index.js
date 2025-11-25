@@ -10,8 +10,8 @@ import { googleRoutes } from './google.js';
 const routes = [
     {
         path: '/',
-        name: 'HomePage',
-        component: HomePage
+        name: 'SimpleEditor',
+        component: () => import(/* webpackChunkName: "simple-editor" */ '../views/SimpleEditor.vue')
     },
     {
         path: '/dashboard',

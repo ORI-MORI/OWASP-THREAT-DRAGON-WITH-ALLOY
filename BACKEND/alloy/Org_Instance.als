@@ -13,8 +13,8 @@ open N2SF_Controls_DB    // 고정
 /* ============================================================
    1. 자산(Asset) 정의 - [속성 추가됨]
    ============================================================ */
-one sig WebServer extends Asset {}
-one sig DB extends Asset {}
+one sig MyPC__Level__S___Zone__Int_ extends Asset {}
+one sig ExtServer__Level__O___Zone__Ext_ extends Asset {}
 
 
 /* ============================================================
@@ -29,21 +29,21 @@ one sig Data_0 extends Data {}
 one sig Flow_0 extends Flow {}
 
 fact Instance_Properties {
-    WebServer.level = Open
-    WebServer.zone = Internal
-    WebServer.status = Secure
-    WebServer.is_registered = True
-    WebServer.has_agent = True
-    DB.level = Open
-    DB.zone = Internal
-    DB.status = Secure
-    DB.is_registered = True
-    DB.has_agent = True
+    MyPC__Level__S___Zone__Int_.level = Open
+    MyPC__Level__S___Zone__Int_.zone = Internal
+    MyPC__Level__S___Zone__Int_.status = Secure
+    MyPC__Level__S___Zone__Int_.is_registered = True
+    MyPC__Level__S___Zone__Int_.has_agent = True
+    ExtServer__Level__O___Zone__Ext_.level = Open
+    ExtServer__Level__O___Zone__Ext_.zone = Internal
+    ExtServer__Level__O___Zone__Ext_.status = Secure
+    ExtServer__Level__O___Zone__Ext_.is_registered = True
+    ExtServer__Level__O___Zone__Ext_.has_agent = True
     Data_0.classification = Open
     Data_0.content = Clean
     Data_0.is_sanitized = True
-    Flow_0.from = WebServer
-    Flow_0.to = DB
+    Flow_0.from = MyPC__Level__S___Zone__Int_
+    Flow_0.to = ExtServer__Level__O___Zone__Ext_
     Flow_0.data = Data_0
     Flow_0.via = none
     Flow_0.is_encrypted = False

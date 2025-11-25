@@ -1,30 +1,33 @@
 <template>
-    <div>
-        <b-row>
-            <b-col md="2">
-                <div ref="stencil_container"></div>
-            </b-col>
-            <b-col md="10">
-                <b-row>
-                    <b-col>
-                        <h3 class="td-graph-title">{{ diagram.title }}</h3>
-                    </b-col>
-                    <b-col align="right">
+    <div class="graph-root">
+        <!-- Top Area: Sidebar + Canvas -->
+        <div class="top-area">
+            <!-- Palette / Stencil Sidebar -->
+            <div class="stencil-sidebar">
+                <div class="stencil-header">Elements</div>
+                <div ref="stencil_container" class="stencil-content"></div>
+            </div>
+
+            <!-- Main Canvas Area -->
+            <div class="canvas-area">
+                <div class="canvas-toolbar">
+                    <div class="diagram-title">{{ diagram.title }}</div>
+                    <div class="toolbar-buttons">
                         <td-graph-buttons :graph="graph" @saved="saved" @closed="closed" @verify="verify" />
-                    </b-col>
-                </b-row>
-                <b-row>
-                    <b-col style="display: flex;    width: 100vw; ">
-                        <div
-                            id="graph-container"
-                            ref="graph_container"
-                            style="height: 65vh; width: 100%; flex: 1; "
-                        ></div>
-                    </b-col>
-                </b-row>
-            </b-col>
-        </b-row>
-        <td-graph-meta @threatSelected="threatSelected" @threatSuggest="threatSuggest" />
+                    </div>
+                </div>
+                
+                <div id="graph-container" ref="graph_container" class="x6-graph-container"></div>
+            </div>
+        </div>
+
+        <!-- Bottom Area: Properties -->
+        <div class="bottom-area">
+            <div class="properties-header">Properties</div>
+            <div class="properties-content">
+                <td-graph-properties />
+            </div>
+        </div>
 
         <div>
             <td-keyboard-shortcuts />
@@ -35,8 +38,101 @@
 </template>
 
 <style lang="scss" scoped>
-.td-graph-title {
-    margin-right: 15px;
+.graph-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.top-area {
+    display: flex;
+    flex: 1; /* Takes up remaining space, but we'll limit it */
+    height: 70%; /* Approximate split */
+    min-height: 400px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.stencil-sidebar {
+    width: 240px;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.stencil-header {
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #5f6368;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.stencil-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.canvas-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+    position: relative;
+    overflow: hidden; /* Ensure graph stays within bounds */
+}
+
+.canvas-toolbar {
+    height: 56px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+}
+
+.diagram-title {
+    font-size: 18px;
+    color: #202124;
+}
+
+.x6-graph-container {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    outline: none;
+}
+
+.bottom-area {
+    height: 30%;
+    min-height: 200px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.properties-header {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #5f6368;
+    background-color: #f1f3f4;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.properties-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
 }
 </style>
 
@@ -44,7 +140,7 @@
 import { mapState } from 'vuex';
 
 import TdGraphButtons from '@/components/GraphButtons.vue';
-import TdGraphMeta from '@/components/GraphMeta.vue';
+import TdGraphProperties from '@/components/GraphProperties.vue';
 import TdKeyboardShortcuts from '@/components/KeyboardShortcuts.vue';
 import TdThreatEditDialog from '@/components/ThreatEditDialog.vue';
 import TdThreatSuggestDialog from './ThreatSuggestDialog.vue';
@@ -59,7 +155,7 @@ export default {
     name: 'TdGraph',
     components: {
         TdGraphButtons,
-        TdGraphMeta,
+        TdGraphProperties,
         TdKeyboardShortcuts,
         TdThreatEditDialog,
         TdThreatSuggestDialog
