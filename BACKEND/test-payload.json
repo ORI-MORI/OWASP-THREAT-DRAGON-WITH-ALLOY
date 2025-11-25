@@ -1,0 +1,32 @@
+{
+    "cells": [
+        {
+            "id": "1",
+            "shape": "process",
+            "attrs": {
+                "text": {
+                    "text": "WebServer"
+                }
+            }
+        },
+        {
+            "id": "2",
+            "shape": "store",
+            "attrs": {
+                "text": {
+                    "text": "DB"
+                }
+            }
+        },
+        {
+            "id": "3",
+            "shape": "flow",
+            "source": {
+                "cell": "1"
+            },
+            "target": {
+                "cell": "2"
+            }
+        }
+    ]
+}
