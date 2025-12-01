@@ -1,39 +1,49 @@
 module user_instance
 open n2sf_rules
 
-fact { no Location }
+one sig Location1, Location2 extends Location {}
+fact { Location1.id = 1 and Location1.type = Intranet and Location1.grade = Sensitive }
+fact { Location2.id = 2 and Location2.type = Internet and Location2.grade = Open }
+fact { Location = Location1 + Location2 }
 
-fact { no Data }
+one sig Data1, Data2 extends Data {}
+fact { Data1.id = 1 and Data1.grade = Sensitive and Data1.fileType = Document }
+fact { Data2.id = 2 and Data2.grade = Open and Data2.fileType = Media }
+fact { Data = Data1 + Data2 }
 
-one sig System100, System101 extends System {}
-fact { 
-    System100.id = 100 
-    System100.location = Location1 
-    System100.grade = Open 
-    System100.type = Server 
-    System100.authType = ID_PW 
-    System100.stores = none 
-}
+one sig System101, System102 extends System {}
 fact { 
     System101.id = 101 
     System101.location = Location1 
     System101.grade = Sensitive 
-    System101.type = PC 
-    System101.authType = ID_PW 
-    System101.stores = none 
+    System101.type = Server 
+    System101.isCDS = False 
+    System101.authCapability = MFA 
+    System101.isRegistered = True 
+    System101.stores = Data1 
 }
-fact { System = System100 + System101 }
-
-one sig Connection0 extends Connection {}
 fact { 
-    Connection0.from = System100 
-    Connection0.to = System101 
-    Connection0.carries = none 
-    Connection0.protocol = HTTP 
-    Connection0.isEncrypted = False 
-    Connection0.hasCDR = False 
+    System102.id = 102 
+    System102.location = Location2 
+    System102.grade = Open 
+    System102.type = Terminal 
+    System102.isCDS = False 
+    System102.authCapability = Single 
+    System102.isRegistered = True 
+    System102.stores = Data2 
 }
-fact { Connection = Connection0 }
+fact { System = System101 + System102 }
+
+one sig Connection1 extends Connection {}
+fact { 
+    Connection1.from = System101 
+    Connection1.to = System102 
+    Connection1.carries = Data1 
+    Connection1.protocol = HTTPS 
+    Connection1.hasCDR = False 
+    Connection1.hasAntiVirus = True 
+}
+fact { Connection = Connection1 }
 
 one sig AnalysisResult {
     FindStorageViolations: set System -> Data,
@@ -42,7 +52,8 @@ one sig AnalysisResult {
     FindBypassViolations: set Connection,
     FindUnencryptedChannels: set Connection,
     FindAuthIntegrityGaps: set System,
-    FindContentControlFailures: set Connection -> Data
+    FindContentControlFailures: set Connection -> Data,
+    FindUnauthorizedDevices: set System
 }
 
 fact {
@@ -53,6 +64,7 @@ fact {
     AnalysisResult.FindUnencryptedChannels = FindUnencryptedChannels
     AnalysisResult.FindAuthIntegrityGaps = FindAuthIntegrityGaps
     AnalysisResult.FindContentControlFailures = FindContentControlFailures
+    AnalysisResult.FindUnauthorizedDevices = FindUnauthorizedDevices
 }
 
 run CheckViolations { some AnalysisResult }

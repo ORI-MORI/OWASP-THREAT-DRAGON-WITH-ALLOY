@@ -28,7 +28,7 @@ open n2sf_rules
 
         // Data Facts
         jsonData.data.forEach(d => {
-            alloyContent += `fact { Data${d.id}.id = ${d.id} and Data${d.id}.grade = ${d.grade} }\n`;
+            alloyContent += `fact { Data${d.id}.id = ${d.id} and Data${d.id}.grade = ${d.grade} and Data${d.id}.fileType = ${d.fileType} }\n`;
         });
         // Close the set
         alloyContent += `fact { Data = ${jsonData.data.map(d => 'Data' + d.id).join(' + ')} }\n`;
@@ -49,7 +49,9 @@ open n2sf_rules
     System${sys.id}.location = Location${sys.location} 
     System${sys.id}.grade = ${sys.grade} 
     System${sys.id}.type = ${sys.type} 
-    System${sys.id}.authType = ${sys.authType} 
+    System${sys.id}.isCDS = ${sys.isCDS ? 'True' : 'False'} 
+    System${sys.id}.authCapability = ${sys.authCapability} 
+    System${sys.id}.isRegistered = ${sys.isRegistered ? 'True' : 'False'} 
     System${sys.id}.stores = ${stores} 
 }\n`;
         });
@@ -73,8 +75,8 @@ open n2sf_rules
     Connection${connId}.to = System${conn.to} 
     Connection${connId}.carries = ${carries} 
     Connection${connId}.protocol = ${conn.protocol} 
-    Connection${connId}.isEncrypted = ${conn.isEncrypted ? 'True' : 'False'} 
     Connection${connId}.hasCDR = ${conn.hasCDR ? 'True' : 'False'} 
+    Connection${connId}.hasAntiVirus = ${conn.hasAntiVirus ? 'True' : 'False'} 
 }\n`;
         });
         // Close the set
@@ -92,7 +94,8 @@ one sig AnalysisResult {
     FindBypassViolations: set Connection,
     FindUnencryptedChannels: set Connection,
     FindAuthIntegrityGaps: set System,
-    FindContentControlFailures: set Connection -> Data
+    FindContentControlFailures: set Connection -> Data,
+    FindUnauthorizedDevices: set System
 }
 
 fact {
@@ -103,6 +106,7 @@ fact {
     AnalysisResult.FindUnencryptedChannels = FindUnencryptedChannels
     AnalysisResult.FindAuthIntegrityGaps = FindAuthIntegrityGaps
     AnalysisResult.FindContentControlFailures = FindContentControlFailures
+    AnalysisResult.FindUnauthorizedDevices = FindUnauthorizedDevices
 }
 
 run CheckViolations { some AnalysisResult }

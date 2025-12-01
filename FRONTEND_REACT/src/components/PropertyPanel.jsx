@@ -55,8 +55,26 @@ export default function PropertyPanel() {
     const isSystem = isNode && selectedElement.type === 'system';
     const isEdge = !!selectedElement.source;
 
+    // Helper to update stored data list
+    const addData = () => {
+        const currentData = formData.storedData || [];
+        const newId = currentData.length > 0 ? Math.max(...currentData.map(d => d.id)) + 1 : 1;
+        const newDataItem = { id: newId, grade: 'Sensitive', fileType: 'Document' };
+        handleChange('storedData', [...currentData, newDataItem]);
+    };
+
+    const removeData = (id) => {
+        const currentData = formData.storedData || [];
+        handleChange('storedData', currentData.filter(d => d.id !== id));
+    };
+
+    const updateData = (id, field, value) => {
+        const currentData = formData.storedData || [];
+        handleChange('storedData', currentData.map(d => d.id === id ? { ...d, [field]: value } : d));
+    };
+
     return (
-        <div className="w-80 bg-white border-l border-gray-200 p-4 flex flex-col gap-4 overflow-y-auto">
+        <div className="w-80 bg-white border-l border-gray-200 p-4 flex flex-col gap-4 overflow-y-auto h-full">
             <h2 className="text-lg font-bold border-b pb-2">Properties</h2>
 
             <div className="text-xs text-gray-400">ID: {selectedElement.id}</div>
@@ -74,42 +92,53 @@ export default function PropertyPanel() {
                 </div>
             )}
 
-            {/* Grade (Common for Zone and System) */}
-            {(isZone || isSystem) && (
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Grade</label>
-                    <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
-                        value={formData.grade || 'Open'}
-                        onChange={(e) => handleChange('grade', e.target.value)}
-                    >
-                        <option value="Open">Open</option>
-                        <option value="Sensitive">Sensitive</option>
-                        <option value="Classified">Classified</option>
-                    </select>
-                </div>
-            )}
-
             {/* Zone Specific */}
             {isZone && (
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Type</label>
-                    <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
-                        value={formData.type || 'Internet'}
-                        onChange={(e) => handleChange('type', e.target.value)}
-                    >
-                        <option value="Internet">Internet</option>
-                        <option value="Intranet">Intranet</option>
-                        <option value="DMZ">DMZ</option>
-                        <option value="Wireless">Wireless</option>
-                    </select>
-                </div>
+                <>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Grade</label>
+                        <select
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                            value={formData.grade || 'Open'}
+                            onChange={(e) => handleChange('grade', e.target.value)}
+                        >
+                            <option value="Classified">Classified</option>
+                            <option value="Sensitive">Sensitive</option>
+                            <option value="Open">Open</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Type</label>
+                        <select
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                            value={formData.type || 'Internet'}
+                            onChange={(e) => handleChange('type', e.target.value)}
+                        >
+                            <option value="Internet">Internet</option>
+                            <option value="Intranet">Intranet</option>
+                            <option value="DMZ">DMZ</option>
+                            <option value="Wireless">Wireless</option>
+                        </select>
+                    </div>
+                </>
             )}
 
             {/* System Specific */}
             {isSystem && (
                 <>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Grade (Inherited if empty)</label>
+                        <select
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                            value={formData.grade || 'Open'}
+                            onChange={(e) => handleChange('grade', e.target.value)}
+                        >
+                            <option value="Classified">Classified</option>
+                            <option value="Sensitive">Sensitive</option>
+                            <option value="Open">Open</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Type</label>
                         <select
@@ -117,33 +146,84 @@ export default function PropertyPanel() {
                             value={formData.type || 'Server'}
                             onChange={(e) => handleChange('type', e.target.value)}
                         >
+                            <option value="Terminal">Terminal</option>
                             <option value="Server">Server</option>
-                            <option value="PC">PC</option>
-                            <option value="Mobile">Mobile</option>
                             <option value="SecurityDevice">Security Device</option>
-                            <option value="Gateway">Gateway</option>
                         </select>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <input
                             type="checkbox"
-                            id="isGateway"
-                            checked={formData.isGateway || false}
-                            onChange={(e) => handleChange('isGateway', e.target.checked)}
+                            id="isCDS"
+                            checked={formData.isCDS || false}
+                            onChange={(e) => handleChange('isCDS', e.target.checked)}
                         />
-                        <label htmlFor="isGateway" className="text-sm font-medium text-gray-700">Is Gateway?</label>
+                        <label htmlFor="isCDS" className="text-sm font-medium text-gray-700">Is CDS (Cross Domain)?</label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="isRegistered"
+                            checked={formData.isRegistered || false}
+                            onChange={(e) => handleChange('isRegistered', e.target.checked)}
+                        />
+                        <label htmlFor="isRegistered" className="text-sm font-medium text-gray-700">Is Registered Device?</label>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Stored Data (comma separated IDs)</label>
-                        <input
-                            type="text"
+                        <label className="block text-sm font-medium text-gray-700">Auth Capability</label>
+                        <select
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
-                            value={formData.stores || ''}
-                            onChange={(e) => handleChange('stores', e.target.value)}
-                            placeholder="e.g. 101, 102"
-                        />
+                            value={formData.authCapability || 'Single'}
+                            onChange={(e) => handleChange('authCapability', e.target.value)}
+                        >
+                            <option value="Single">Single Factor</option>
+                            <option value="MFA">MFA</option>
+                        </select>
+                    </div>
+
+                    <div className="border-t pt-2 mt-2">
+                        <div className="flex justify-between items-center mb-2">
+                            <label className="block text-sm font-medium text-gray-700">Stored Data</label>
+                            <button onClick={addData} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100">
+                                + Add
+                            </button>
+                        </div>
+                        <div className="space-y-2">
+                            {(formData.storedData || []).map((data, idx) => (
+                                <div key={idx} className="bg-gray-50 p-2 rounded border border-gray-200 text-xs">
+                                    <div className="flex justify-between mb-1">
+                                        <span className="font-bold">ID: {data.id}</span>
+                                        <button onClick={() => removeData(data.id)} className="text-red-500 hover:text-red-700">×</button>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-1">
+                                        <select
+                                            value={data.grade}
+                                            onChange={(e) => updateData(data.id, 'grade', e.target.value)}
+                                            className="border rounded p-0.5"
+                                        >
+                                            <option value="Classified">Classified</option>
+                                            <option value="Sensitive">Sensitive</option>
+                                            <option value="Open">Open</option>
+                                        </select>
+                                        <select
+                                            value={data.fileType}
+                                            onChange={(e) => updateData(data.id, 'fileType', e.target.value)}
+                                            className="border rounded p-0.5"
+                                        >
+                                            <option value="Document">Document</option>
+                                            <option value="Executable">Executable</option>
+                                            <option value="Media">Media</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            ))}
+                            {(formData.storedData || []).length === 0 && (
+                                <div className="text-gray-400 text-xs italic text-center py-2">No data stored</div>
+                            )}
+                        </div>
                     </div>
                 </>
             )}
@@ -158,24 +238,12 @@ export default function PropertyPanel() {
                             value={formData.protocol || 'HTTP'}
                             onChange={(e) => handleChange('protocol', e.target.value)}
                         >
-                            <option value="HTTP">HTTP</option>
                             <option value="HTTPS">HTTPS</option>
                             <option value="SSH">SSH</option>
-                            <option value="FTP">FTP</option>
-                            <option value="SFTP">SFTP</option>
-                            <option value="TCP">TCP</option>
-                            <option value="UDP">UDP</option>
+                            <option value="VPN_Tunnel">VPN Tunnel</option>
+                            <option value="ClearText">ClearText</option>
+                            <option value="SQL">SQL</option>
                         </select>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            id="isEncrypted"
-                            checked={formData.isEncrypted || false}
-                            onChange={(e) => handleChange('isEncrypted', e.target.checked)}
-                        />
-                        <label htmlFor="isEncrypted" className="text-sm font-medium text-gray-700">Encrypted?</label>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -188,6 +256,16 @@ export default function PropertyPanel() {
                         <label htmlFor="hasCDR" className="text-sm font-medium text-gray-700">Has CDR?</label>
                     </div>
 
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="hasAntiVirus"
+                            checked={formData.hasAntiVirus || false}
+                            onChange={(e) => handleChange('hasAntiVirus', e.target.checked)}
+                        />
+                        <label htmlFor="hasAntiVirus" className="text-sm font-medium text-gray-700">Has AntiVirus?</label>
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Carries Data (comma separated IDs)</label>
                         <input
@@ -195,8 +273,9 @@ export default function PropertyPanel() {
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
                             value={formData.carries || ''}
                             onChange={(e) => handleChange('carries', e.target.value)}
-                            placeholder="e.g. 101, 102"
+                            placeholder="e.g. 1, 2"
                         />
+                        <p className="text-xs text-gray-500 mt-1">Enter IDs of data defined in Systems.</p>
                     </div>
                 </>
             )}

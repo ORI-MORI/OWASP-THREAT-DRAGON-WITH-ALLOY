@@ -4,7 +4,6 @@ export function convertGraphToJSON(nodes, edges) {
 
     // Helper to check intersection
     const isInside = (inner, outer) => {
-        // Assuming default sizes if not measured yet
         const innerW = inner.width || 100;
         const innerH = inner.height || 100;
         const outerW = outer.width || 200;
@@ -20,8 +19,8 @@ export function convertGraphToJSON(nodes, edges) {
 
     // 1. Map Locations (Zones)
     const locations = zones.map((z, index) => ({
-        id: index + 1, // Simple ID generation
-        realId: z.id, // Keep track of React Flow ID
+        id: index + 1,
+        realId: z.id,
         type: z.data.type || 'Internet',
         grade: z.data.grade || 'Open',
     }));
@@ -34,23 +33,23 @@ export function convertGraphToJSON(nodes, edges) {
             return isInside(s, zoneNode);
         });
 
-        // Default to first location or create a default "Internet" if none found?
-        // For now, if no parent, assume ID 1 (or we should warn).
-        // Let's default to the first location if available, or 0.
         const locationId = parentZone ? parentZone.id : (locations[0]?.id || 1);
 
-        // Parse stores data (comma separated string -> array of ints)
-        const storesStr = s.data.stores || '';
-        const stores = storesStr.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+        // Parse stored data (Array of objects from PropertyPanel)
+        const storedData = s.data.storedData || [];
+        const storesIds = storedData.map(d => d.id);
 
         return {
-            id: index + 100, // Start from 100 to avoid collision
+            id: index + 100, // Start from 100
             realId: s.id,
             location: locationId,
-            grade: s.data.grade || (parentZone ? parentZone.grade : 'Open'), // Inherit or explicit
+            grade: s.data.grade || (parentZone ? parentZone.grade : 'Open'),
             type: s.data.type || 'Server',
-            authType: s.data.authType || 'ID_PW', // Default
-            stores: stores,
+            isCDS: s.data.isCDS || false,
+            authCapability: s.data.authCapability || 'Single',
+            isRegistered: s.data.isRegistered || false,
+            stores: storesIds,
+            _storedDataObjects: storedData // Keep for data collection
         };
     });
 
@@ -69,33 +68,54 @@ export function convertGraphToJSON(nodes, edges) {
             from: fromSys.id,
             to: toSys.id,
             carries: carries,
-            protocol: e.data?.protocol || 'HTTP',
-            isEncrypted: e.data?.isEncrypted || false,
+            protocol: e.data?.protocol || 'HTTPS',
             hasCDR: e.data?.hasCDR || false,
+            hasAntiVirus: e.data?.hasAntiVirus || false,
             realId: e.id
         };
     }).filter(c => c !== null);
 
-    // 4. Collect Data definitions (implicitly from stores/carries)
-    // In a real app, we might have a separate Data registry.
-    // Here we just need to ensure they exist in the 'data' array if referenced.
-    // We'll collect all unique data IDs and create dummy definitions for them.
-    const allDataIds = new Set();
-    mappedSystems.forEach(s => s.stores.forEach(id => allDataIds.add(id)));
-    connections.forEach(c => c.carries.forEach(id => allDataIds.add(id)));
+    // 4. Collect Data definitions
+    // Iterate over all systems and collect unique data objects defined in 'storedData'
+    const allDataMap = new Map();
 
-    const dataList = Array.from(allDataIds).map(id => ({
-        id: id,
-        grade: 'Sensitive', // Default, ideally user defines this too
-        description: `Data ${id}`
-    }));
+    mappedSystems.forEach(s => {
+        if (s._storedDataObjects) {
+            s._storedDataObjects.forEach(d => {
+                if (!allDataMap.has(d.id)) {
+                    allDataMap.set(d.id, {
+                        id: d.id,
+                        grade: d.grade || 'Sensitive',
+                        fileType: d.fileType || 'Document'
+                    });
+                }
+            });
+        }
+    });
+
+    // Also check connections for any data IDs that might be missing definitions (fallback)
+    connections.forEach(c => {
+        c.carries.forEach(id => {
+            if (!allDataMap.has(id)) {
+                allDataMap.set(id, {
+                    id: id,
+                    grade: 'Sensitive', // Default fallback
+                    fileType: 'Document' // Default fallback
+                });
+            }
+        });
+    });
+
+    const dataList = Array.from(allDataMap.values());
+
+    // Remove temporary helper field
+    const finalSystems = mappedSystems.map(({ _storedDataObjects, ...rest }) => rest);
 
     return {
         locations: locations.map(({ realId, ...rest }) => rest),
-        systems: mappedSystems.map(({ realId, ...rest }) => rest),
+        systems: finalSystems.map(({ realId, ...rest }) => rest),
         connections: connections.map(({ realId, ...rest }) => rest),
         data: dataList,
-        // Helper mapping to trace back violations
         _mapping: {
             systems: mappedSystems,
             connections: connections
