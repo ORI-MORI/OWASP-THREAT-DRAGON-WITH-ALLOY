@@ -16,6 +16,7 @@ import Sidebar from './Sidebar';
 import ZoneNode from './ZoneNode';
 import SystemNode from './SystemNode';
 import PropertyPanel from './PropertyPanel';
+import AnalysisPanel from './AnalysisPanel';
 import useStore from '../store';
 import { convertGraphToJSON } from '../utils/graphConverter';
 import { analyzeGraph } from '../api/analyze';
@@ -35,7 +36,6 @@ const EditorContent = () => {
     const { project } = useReactFlow();
     const { setSelectedElement } = useStore();
     const [analysisResult, setAnalysisResult] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useOnSelectionChange({
         onChange: ({ nodes, edges }) => {
@@ -99,7 +99,6 @@ const EditorContent = () => {
 
         if (result.success) {
             setAnalysisResult(result.result);
-            setIsModalOpen(true);
 
             // Highlighting Logic
             const violatingIds = new Set();
@@ -144,6 +143,10 @@ const EditorContent = () => {
         }
     };
 
+    const handleClosePanel = () => {
+        setAnalysisResult(null);
+    };
+
     return (
         <div className="flex flex-row h-screen w-screen">
             <Sidebar />
@@ -157,63 +160,11 @@ const EditorContent = () => {
                     </button>
                 </div>
 
-                {/* Violations Modal */}
-                {isModalOpen && analysisResult && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg shadow-xl w-3/4 max-w-2xl max-h-[80vh] flex flex-col">
-                            <div className="p-4 border-b flex justify-between items-center bg-red-50 rounded-t-lg">
-                                <h3 className="font-bold text-red-700 text-lg">Security Analysis Results</h3>
-                                <button
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="text-gray-500 hover:text-gray-700 font-bold text-xl"
-                                >
-                                    &times;
-                                </button>
-                            </div>
-
-                            <div className="p-6 overflow-y-auto">
-                                {analysisResult.total_count === 0 ? (
-                                    <div className="text-green-600 font-semibold text-center text-lg">
-                                        No violations found. System is secure.
-                                    </div>
-                                ) : (
-                                    <div className="space-y-6">
-                                        <div className="bg-red-50 border border-red-200 p-3 rounded text-red-800 font-medium">
-                                            Found {analysisResult.total_count} violations.
-                                        </div>
-
-                                        {Object.entries(analysisResult.threats).map(([key, items]) => {
-                                            if (items.length === 0) return null;
-                                            return (
-                                                <div key={key} className="border rounded-lg p-4 shadow-sm">
-                                                    <h4 className="font-bold text-gray-800 mb-2 border-b pb-1">
-                                                        {key.replace(/([A-Z])/g, ' $1').trim()} {/* CamelCase to Space */}
-                                                    </h4>
-                                                    <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
-                                                        {items.map((item, idx) => (
-                                                            <li key={idx}>
-                                                                {Object.entries(item).map(([k, v]) => `${k}: ${v}`).join(', ')}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="p-4 border-t bg-gray-50 rounded-b-lg flex justify-end">
-                                <button
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {/* Analysis Results Panel */}
+                <AnalysisPanel
+                    result={analysisResult}
+                    onClose={handleClosePanel}
+                />
 
                 <ReactFlow
                     nodes={nodes}

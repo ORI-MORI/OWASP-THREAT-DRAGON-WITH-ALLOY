@@ -1,6 +1,6 @@
 export async function analyzeGraph(payload) {
     try {
-        const response = await fetch('http://localhost:3000/analyze', {
+        const response = await fetch('http://localhost:3001/analyze', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

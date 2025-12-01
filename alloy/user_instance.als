@@ -1,26 +1,39 @@
 module user_instance
 open n2sf_rules
 
-one sig Location1 extends Location {}
-fact { Location1.id = 1 and Location1.type = Internet and Location1.grade = Open }
-fact { Location = Location1 }
+fact { no Location }
 
-one sig Data999 extends Data {}
-fact { Data999.id = 999 and Data999.grade = Classified }
-fact { Data = Data999 }
+fact { no Data }
 
-one sig System99 extends System {}
+one sig System100, System101 extends System {}
 fact { 
-    System99.id = 99 
-    System99.location = Location1 
-    System99.grade = Open 
-    System99.type = PC 
-    System99.authType = NoAuth 
-    System99.stores = Data999 
+    System100.id = 100 
+    System100.location = Location1 
+    System100.grade = Open 
+    System100.type = Server 
+    System100.authType = ID_PW 
+    System100.stores = none 
 }
-fact { System = System99 }
+fact { 
+    System101.id = 101 
+    System101.location = Location1 
+    System101.grade = Sensitive 
+    System101.type = PC 
+    System101.authType = ID_PW 
+    System101.stores = none 
+}
+fact { System = System100 + System101 }
 
-fact { no Connection }
+one sig Connection0 extends Connection {}
+fact { 
+    Connection0.from = System100 
+    Connection0.to = System101 
+    Connection0.carries = none 
+    Connection0.protocol = HTTP 
+    Connection0.isEncrypted = False 
+    Connection0.hasCDR = False 
+}
+fact { Connection = Connection0 }
 
 one sig AnalysisResult {
     FindStorageViolations: set System -> Data,

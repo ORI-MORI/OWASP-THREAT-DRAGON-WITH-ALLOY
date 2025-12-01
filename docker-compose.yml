@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./BACKEND
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./BACKEND:/app
+      - /app/node_modules
+    environment:
+      - PORT=3001
+
+  frontend-react:
+    build: ./FRONTEND_REACT
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./FRONTEND_REACT:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:3001
+
+  threat-dragon:
+    build: ./threat-dragon
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./threat-dragon:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
