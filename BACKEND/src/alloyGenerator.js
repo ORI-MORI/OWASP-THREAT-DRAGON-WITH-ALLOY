@@ -50,6 +50,7 @@ open n2sf_rules
     System${sys.id}.grade = ${sys.grade} 
     System${sys.id}.type = ${sys.type} 
     System${sys.id}.isCDS = ${sys.isCDS ? 'True' : 'False'} 
+    System${sys.id}.isDeidentifier = ${sys.isDeidentifier ? 'True' : 'False'} 
     System${sys.id}.authCapability = ${sys.authCapability} 
     System${sys.id}.isRegistered = ${sys.isRegistered ? 'True' : 'False'} 
     System${sys.id}.stores = ${stores} 

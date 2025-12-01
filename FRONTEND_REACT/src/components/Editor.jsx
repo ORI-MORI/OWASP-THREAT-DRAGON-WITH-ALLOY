@@ -16,7 +16,6 @@ import Sidebar from './Sidebar';
 import ZoneNode from './ZoneNode';
 import SystemNode from './SystemNode';
 import PropertyPanel from './PropertyPanel';
-import AnalysisPanel from './AnalysisPanel';
 import useStore from '../store';
 import { convertGraphToJSON } from '../utils/graphConverter';
 import { analyzeGraph } from '../api/analyze';
@@ -160,12 +159,6 @@ const EditorContent = () => {
                     </button>
                 </div>
 
-                {/* Analysis Results Panel */}
-                <AnalysisPanel
-                    result={analysisResult}
-                    onClose={handleClosePanel}
-                />
-
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -181,7 +174,7 @@ const EditorContent = () => {
                     <Background variant="dots" gap={12} size={1} />
                 </ReactFlow>
             </div>
-            <PropertyPanel />
+            <PropertyPanel analysisResult={analysisResult} />
         </div>
     );
 };
