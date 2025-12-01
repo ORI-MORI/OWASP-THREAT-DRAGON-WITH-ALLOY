@@ -1,59 +1,65 @@
 module user_instance
+open n2sf_base
 open n2sf_rules
 
-one sig Location1, Location2 extends Location {}
-fact { Location1.id = 1 and Location1.grade = Open and Location1.type = Internet }
-fact { Location2.id = 2 and Location2.grade = Sensitive and Location2.type = Internet }
-fact { Location = Location1 + Location2 }
+// ============================================================
+// [TEMPLATE] 사용자 다이어그램 데이터 주입 영역
+// ============================================================
 
-fact { no Data }
+// ---------------------------------------------------------
+// 1. Zone (망 영역) 정의
+// ---------------------------------------------------------
+// [Loop: locations 배열을 순회하며 생성]
+/* 예시:
+one sig [LOC_ID] extends Location {}
+fact { [LOC_ID].grade = [GRADE] and [LOC_ID].type = [TYPE] }
+*/
 
-one sig System100, System101, System102 extends System {}
-fact { 
-    System100.id = 100 
-    System100.location = Location1 
-    System100.grade = Open 
-    System100.type = Server 
-    System100.isCDS = False 
-    System100.isDeidentifier = False 
-    System100.authType = Single 
-    System100.isRegistered = False 
-    System100.stores = none 
-}
-fact { 
-    System101.id = 101 
-    System101.location = Location2 
-    System101.grade = Sensitive 
-    System101.type = Terminal 
-    System101.isCDS = False 
-    System101.isDeidentifier = False 
-    System101.authType = Single 
-    System101.isRegistered = False 
-    System101.stores = none 
-}
-fact { 
-    System102.id = 102 
-    System102.location = Location1 
-    System102.grade = Open 
-    System102.type = NetworkDevice 
-    System102.isCDS = False 
-    System102.isDeidentifier = False 
-    System102.authType = Single 
-    System102.isRegistered = False 
-    System102.stores = none 
-}
-fact { System = System100 + System101 + System102 }
+// ---------------------------------------------------------
+// 2. Data (업무 정보) 정의
+// ---------------------------------------------------------
+// [Loop: data 배열을 순회하며 생성]
+/* 예시:
+one sig [DATA_ID] extends Data {}
+fact { [DATA_ID].grade = [GRADE] and [DATA_ID].fileType = [FILE_TYPE] }
+*/
 
-one sig Connection0 extends Connection {}
-fact { 
-    Connection0.from = System102 
-    Connection0.to = System101 
-    Connection0.carries = none 
-    Connection0.protocol = HTTPS 
-    Connection0.hasCDR = False 
-    Connection0.hasAntiVirus = False 
+// ---------------------------------------------------------
+// 3. System (노드) 정의
+// ---------------------------------------------------------
+// [Loop: systems 배열을 순회하며 생성]
+/* 예시:
+one sig [SYS_ID] extends System {}
+fact {
+    [SYS_ID].grade        = [GRADE]
+    [SYS_ID].loc          = [LOCATION_ID]
+    [SYS_ID].type         = [NODE_TYPE]
+    [SYS_ID].authType     = [AUTH_TYPE]
+    [SYS_ID].isCDS        = [True/False]
+    [SYS_ID].isRegistered = [True/False]
+    // 저장된 데이터가 없으면 'none', 있으면 'Data1 + Data2' 형태로 연결
+    [SYS_ID].stores       = [DATA_IDS_OR_NONE]
 }
-fact { Connection = Connection0 }
+*/
 
-// Run the check defined in n2sf_rules
-run CheckViolations
+// ---------------------------------------------------------
+// 4. Connection (연결) 정의
+// ---------------------------------------------------------
+// [Loop: connections 배열을 순회하며 생성]
+/* 예시:
+one sig [CONN_ID] extends Connection {}
+fact {
+    [CONN_ID].from         = [SOURCE_SYS_ID]
+    [CONN_ID].to           = [TARGET_SYS_ID]
+    [CONN_ID].carries      = [DATA_IDS_OR_NONE]
+    [CONN_ID].protocol     = [PROTOCOL]
+    [CONN_ID].isEncrypted  = [True/False]
+    [CONN_ID].hasCDR       = [True/False]
+    [CONN_ID].hasAntiVirus = [True/False]
+}
+*/
+
+// ---------------------------------------------------------
+// 5. 실행 명령
+// ---------------------------------------------------------
+run {}

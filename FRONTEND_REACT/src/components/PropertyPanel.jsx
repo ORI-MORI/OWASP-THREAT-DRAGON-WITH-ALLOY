@@ -5,7 +5,7 @@ import useStore from '../store';
 
 export default function PropertyPanel({ analysisResult }) {
     const { selectedElement, setSelectedElement } = useStore();
-    const { setNodes, setEdges } = useReactFlow();
+    const { setNodes, setEdges, getNodes } = useReactFlow();
     const [formData, setFormData] = useState({});
     const [activeTab, setActiveTab] = useState('properties'); // 'properties' | 'threats'
 
@@ -129,6 +129,23 @@ export default function PropertyPanel({ analysisResult }) {
                 {isSystem && (
                     <>
                         <div>
+                            <label className="block text-sm font-medium text-gray-700">Location (Zone)</label>
+                            <select
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                value={formData.loc || ''}
+                                onChange={(e) => handleChange('loc', e.target.value)}
+                            >
+                                <option value="">(Auto-detect)</option>
+                                {getNodes().filter(n => n.type === 'zone').map(zone => (
+                                    <option key={zone.id} value={zone.id}>
+                                        {zone.data.label || `Zone ${zone.id}`}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">Override automatic placement.</p>
+                        </div>
+
+                        <div>
                             <label className="block text-sm font-medium text-gray-700">Grade (Inherited if empty)</label>
                             <select
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
@@ -182,99 +199,6 @@ export default function PropertyPanel({ analysisResult }) {
                                 onChange={(e) => handleChange('isRegistered', e.target.checked)}
                             />
                             <label htmlFor="isRegistered" className="text-sm font-medium text-gray-700">Is Registered Device?</label>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Auth Type</label>
-                            <select
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
-                                value={formData.authType || 'Single'}
-                                onChange={(e) => handleChange('authType', e.target.value)}
-                            >
-                                <option value="Single">Single Factor</option>
-                                <option value="MFA">MFA</option>
-                            </select>
-                        </div>
-
-                        <div className="border-t pt-2 mt-2">
-                            <div className="flex justify-between items-center mb-2">
-                                <label className="block text-sm font-medium text-gray-700">Stored Data</label>
-                                <button onClick={addData} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100">
-                                    + Add
-                                </button>
-                            </div>
-                            <div className="space-y-2">
-                                {(formData.storedData || []).map((data, idx) => (
-                                    <div key={idx} className="bg-gray-50 p-2 rounded border border-gray-200 text-xs">
-                                        <div className="flex justify-between mb-1">
-                                            <span className="font-bold">ID: {data.id}</span>
-                                            <button onClick={() => removeData(data.id)} className="text-red-500 hover:text-red-700">×</button>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-1">
-                                            <select
-                                                value={data.grade}
-                                                onChange={(e) => updateData(data.id, 'grade', e.target.value)}
-                                                className="border rounded p-0.5"
-                                            >
-                                                <option value="Classified">Classified</option>
-                                                <option value="Sensitive">Sensitive</option>
-                                                <option value="Open">Open</option>
-                                            </select>
-                                            <select
-                                                value={data.fileType}
-                                                onChange={(e) => updateData(data.id, 'fileType', e.target.value)}
-                                                className="border rounded p-0.5"
-                                            >
-                                                <option value="Document">Document</option>
-                                                <option value="Executable">Executable</option>
-                                                <option value="Media">Media</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                ))}
-                                {(formData.storedData || []).length === 0 && (
-                                    <div className="text-gray-400 text-xs italic text-center py-2">No data stored</div>
-                                )}
-                            </div>
-                        </div>
-                    </>
-                )}
-
-                {/* Edge Specific */}
-                {isEdge && (
-                    <>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">Protocol</label>
-                            <select
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
-                                value={formData.protocol || 'ClearText'}
-                                onChange={(e) => handleChange('protocol', e.target.value)}
-                            >
-                                <option value="HTTPS">HTTPS</option>
-                                <option value="SSH">SSH</option>
-                                <option value="VPN">VPN</option>
-                                <option value="ClearText">ClearText</option>
-                            </select>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="hasCDR"
-                                checked={formData.hasCDR || false}
-                                onChange={(e) => handleChange('hasCDR', e.target.checked)}
-                            />
-                            <label htmlFor="hasCDR" className="text-sm font-medium text-gray-700">Has CDR?</label>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="hasAntiVirus"
-                                checked={formData.hasAntiVirus || false}
-                                onChange={(e) => handleChange('hasAntiVirus', e.target.checked)}
-                            />
-                            <label htmlFor="hasAntiVirus" className="text-sm font-medium text-gray-700">Has AntiVirus?</label>
                         </div>
 
                         <div>

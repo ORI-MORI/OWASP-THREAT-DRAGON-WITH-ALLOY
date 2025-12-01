@@ -37,11 +37,20 @@ export function convertGraphToJSON(nodes, edges) {
 
     // 2. Map Systems
     const mappedSystems = systems.map((s, index) => {
-        // Find parent zone
-        const parentZone = locations.find((loc) => {
-            const zoneNode = zones.find((z) => z.id === loc.realId);
-            return isInside(s, zoneNode);
-        });
+        let parentZone = null;
+
+        // 1. Check for manual override
+        if (s.data.loc) {
+            parentZone = locations.find(l => l.realId === s.data.loc);
+        }
+
+        // 2. Fallback to spatial detection if no override or override invalid
+        if (!parentZone) {
+            parentZone = locations.find((loc) => {
+                const zoneNode = zones.find((z) => z.id === loc.realId);
+                return isInside(s, zoneNode);
+            });
+        }
 
         const locationId = parentZone ? parentZone.id : (locations[0]?.id || 1);
 
@@ -52,11 +61,11 @@ export function convertGraphToJSON(nodes, edges) {
         return {
             id: index + 100, // Start from 100
             realId: s.id,
-            location: locationId,
+            loc: locationId, // Changed from 'location' to 'loc'
             grade: s.data.grade || (parentZone ? parentZone.grade : 'Open'),
-            type: s.data.type || 'Server',
+            type: s.data.type || 'Terminal',
             isCDS: s.data.isCDS || false,
-            authCapability: s.data.authCapability || 'Single',
+            authType: s.data.authType || 'Single', // Changed from authCapability
             isRegistered: s.data.isRegistered || false,
             stores: storesIds,
             _storedDataObjects: storedData // Keep for data collection
@@ -72,13 +81,21 @@ export function convertGraphToJSON(nodes, edges) {
 
         // Parse carries data
         const carriesStr = e.data?.carries || '';
-        const carries = carriesStr.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+        // Handle comma separated string or array
+        let carries = [];
+        if (Array.isArray(carriesStr)) {
+            carries = carriesStr.map(x => parseInt(x));
+        } else if (typeof carriesStr === 'string' && carriesStr.trim() !== '') {
+            carries = carriesStr.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+        }
 
         return {
+            id: e.id.replace(/\D/g, '') || (Math.floor(Math.random() * 1000)), // Ensure numeric ID or unique
             from: fromSys.id,
             to: toSys.id,
             carries: carries,
             protocol: e.data?.protocol || 'HTTPS',
+            isEncrypted: e.data?.isEncrypted || false,
             hasCDR: e.data?.hasCDR || false,
             hasAntiVirus: e.data?.hasAntiVirus || false,
             realId: e.id
@@ -86,7 +103,6 @@ export function convertGraphToJSON(nodes, edges) {
     }).filter(c => c !== null);
 
     // 4. Collect Data definitions
-    // Iterate over all systems and collect unique data objects defined in 'storedData'
     const allDataMap = new Map();
 
     mappedSystems.forEach(s => {
@@ -118,12 +134,9 @@ export function convertGraphToJSON(nodes, edges) {
 
     const dataList = Array.from(allDataMap.values());
 
-    // Remove temporary helper field
-    const finalSystems = mappedSystems.map(({ _storedDataObjects, ...rest }) => rest);
-
     return {
         locations: locations.map(({ realId, ...rest }) => rest),
-        systems: finalSystems.map(({ realId, ...rest }) => rest),
+        systems: mappedSystems.map(({ realId, _storedDataObjects, ...rest }) => rest),
         connections: connections.map(({ realId, ...rest }) => rest),
         data: dataList,
         _mapping: {

@@ -1,185 +1,76 @@
 module n2sf_rules
+open n2sf_base
 
-/* ==========================================================================
-   [N2SF Rules Module - Full Spec Implementation]
-   - Defines Enums: Grade, ZoneType, NodeType, AuthType, Protocol, FileType
-   - Defines Signatures: Location, System, Connection, Data
-   - Implements 7 Detection Engines
-   ========================================================================== */
+// ============================================================
+// [Group A] 구조적 위협 탐지 (Structural Threats)
+// ============================================================
 
-// 1. Enums & Hierarchy
-
-enum Grade { Classified, Sensitive, Open } // C > S > O
-enum ZoneType { Internet, Intranet, DMZ, Wireless }
-enum NodeType { Terminal, Server, SecurityDevice, NetworkDevice }
-enum AuthType { Single, MFA }
-enum Protocol { HTTPS, SSH, VPN, ClearText }
-enum FileType { Document, Executable, Media }
-enum Bool { True, False }
-
-// 2. Signatures
-
-sig Location {
-    id: one Int,
-    grade: one Grade,
-    type: one ZoneType
-}
-
-sig Data {
-    id: one Int,
-    grade: one Grade,
-    fileType: one FileType
-}
-
-sig System {
-    id: one Int,
-    location: one Location,
-    grade: one Grade, // Inherited or explicit
-    type: one NodeType,
-    isCDS: one Bool,
-    isDeidentifier: one Bool, // Kept for future extensibility, though not in main spec
-    authType: one AuthType,
-    isRegistered: one Bool,
-    stores: set Data
-}
-
-sig Connection {
-    from: one System,
-    to: one System,
-    carries: set Data,
-    protocol: one Protocol,
-    hasCDR: one Bool,
-    hasAntiVirus: one Bool // Kept for completeness
-}
-
-// 3. Helper Functions
-
-// [Grade Comparison]
-// Returns true if g1 is strictly greater than g2 (Higher Security)
-// [Grade Comparison]
-// Returns true if g1 is strictly greater than g2 (Higher Security)
-pred gradeGt[g1, g2: Grade] {
-    (g1 = Classified and (g2 = Sensitive or g2 = Open)) or
-    (g1 = Sensitive and g2 = Open)
-}
-
-// [Transitive Reachability with CDS Stop]
-// Returns the set of Systems reachable from 'start', stopping at CDS.
-fun reachable[start: System]: set System {
-    start.^({ s1, s2: System | 
-        some c: Connection | 
-            c.from = s1 and c.to = s2 and 
-            (s1.isCDS = False) 
-    })
-}
-
-// 4. Detection Engines (7 Core Rules)
-
-// [Engine 1] FindStorageViolations (Information Storage Principle)
-// System Grade < Data Grade
-fun FindStorageViolations: set System -> Data {
-    { s: System, d: Data |
-        d in s.stores and
-        gradeGt[d.grade, s.grade]
+// 1. 정보 저장 위반 (Storage Violation)
+// 규칙: 시스템 등급보다 높은 등급의 데이터를 저장하면 안 됨
+fun FindStorageViolations: System -> Data {
+    { s: System, d: Data | 
+      d in s.stores and lt[s.grade, d.grade] 
     }
 }
 
-// [Engine 2] FindFlowViolations (Information Movement Principle)
-// Target System Grade < Data Grade (Transitive, CDS Exception)
-fun FindFlowViolations: set Connection -> Data {
+// 2. 정보 이동 위반 (Flow Violation)
+// 규칙: 데이터 등급보다 낮은 시스템으로 전송 불가 (단, 목적지가 CDS면 예외 허용)
+fun FindFlowViolations: Connection -> Data {
     { c: Connection, d: Data |
-        d in c.carries and
-        some target: reachable[c.from] | {
-            (target = c.to or target in reachable[c.to]) and
-            gradeGt[d.grade, target.grade] and
-            // CDS Exception is handled by 'reachable' stopping at CDS.
-            // If path goes through CDS, 'target' beyond CDS won't be in reachable set from c.from
-            // UNLESS we need to check the specific link *into* the CDS?
-            // Spec says: "passing through CDS is considered controlled".
-            // So if A -> CDS -> B, and A > B.
-            // A->CDS link: CDS is target. If CDS grade >= Data grade, OK.
-            // CDS->B link: CDS is source. CDS stops reachability from A.
-            // So we just need to check if *any reachable target* has lower grade.
-            true
-        }
+      d in c.carries
+      and lt[c.to.grade, d.grade]  // 목적지 등급이 데이터보다 낮고
+      and c.to.isCDS = False       // 목적지가 연계체계(CDS)가 아닌 경우
     }
 }
 
-// [Engine 3] FindLocationViolations (Location Principle)
-// Zone Grade < System Grade
-// (System cannot exist in a location with lower security grade)
-fun FindLocationViolations: set System {
-    { s: System |
-        gradeGt[s.grade, s.location.grade]
-    }
+// 3. 위치 부적절성 (Location Mismatch)
+// 규칙: 시스템은 자신보다 낮은 등급의 망(Zone)에 배치될 수 없음
+fun FindLocationViolations: System {
+    { s: System | lt[s.loc.grade, s.grade] }
 }
 
-// [Engine 4] FindBypassViolations (Bypass Connection)
-// Internet Zone -> Intranet Zone without CDS
-fun FindBypassViolations: set Connection {
+// 4. 우회 접속 (Boundary Bypass)
+// 규칙: 인터넷망(Internet)에서 내부망(Intranet)으로 직접 연결 시 CDS를 경유하지 않으면 위협
+fun FindBypassViolations: Connection {
     { c: Connection |
-        c.from.location.type = Internet and
-        c.to.location.type = Intranet and
-        c.from.isCDS = False and // Source is not CDS
-        c.to.isCDS = False       // Destination is not CDS (if dest is CDS, it's a valid gateway)
-        // Note: Strict interpretation might require checking the *path*, but spec says "connection"
-        // If it's a direct connection, this covers it.
-        // If it's multi-hop, the transitive closure in Flow might cover data, 
-        // but this specific rule targets the *existence* of a path.
-        // For now, we check direct connections as per "Edge" definition in spec.
+      c.from.loc.type = Internet
+      and c.to.loc.type = Intranet
+      and c.to.isCDS = False       // 목적지가 CDS(보안게이트웨이)가 아님
     }
 }
 
-// [Engine 5] FindUnencryptedChannels (Encryption)
-// Internet or Wireless Zone + ClearText Protocol
-fun FindUnencryptedChannels: set Connection {
+// ============================================================
+// [Group B] 속성적 위협 탐지 (Attribute Threats)
+// ============================================================
+
+// 5. 암호화 미적용 (Unencrypted Channel)
+// 규칙: 인터넷/무선망 구간을 지나는 연결이 평문(ClearText)이거나 암호화 속성이 꺼져있음
+fun FindUnencryptedChannels: Connection {
     { c: Connection |
-        (c.from.location.type = Internet or c.from.location.type = Wireless or
-         c.to.location.type = Internet or c.to.location.type = Wireless) and
-        c.protocol = ClearText
+      (c.from.loc.type in (Internet + Wireless) or c.to.loc.type in (Internet + Wireless))
+      and (c.protocol = ClearText or c.isEncrypted = False)
     }
 }
 
-// [Engine 6] FindAuthIntegrityGaps (Auth/Integrity)
-// Sensitive+ System AND (Single Auth OR Unregistered)
-fun FindAuthIntegrityGaps: set System {
+// 6. 인증 및 무결성 미비 (Auth/Integrity Gap)
+// 규칙: 민감(S) 등급 이상 시스템에 '단일 인증'만 쓰거나 '미등록' 상태인 경우
+fun FindAuthIntegrityGaps: System {
     { s: System |
-        (s.grade = Sensitive or s.grade = Classified) and
-        (s.authType = Single or s.isRegistered = False)
+      s.grade in (Sensitive + Classified) // S등급 이상인데
+      and (s.authType = Single or s.isRegistered = False) // 보안 미비
     }
 }
 
-// [Engine 7] FindContentControlFailures (Content Control)
-// Document Data AND Zone Change AND No CDR
-fun FindContentControlFailures: set Connection -> Data {
+// 7. 콘텐츠 통제 부재 (Content Control Failure)
+// 규칙: 망 간 이동(Zone 변경) 시 문서 파일(Document)에 대해 CDR(무해화) 미적용
+fun FindContentControlFailures: Connection -> Data {
     { c: Connection, d: Data |
-        d in c.carries and
-        d.fileType = Document and
-        c.from.location != c.to.location and
-        c.hasCDR = False
+      d in c.carries
+      and d.fileType = Document       // 문서 파일인데
+      and c.from.loc != c.to.loc      // 망 경계를 넘어가는데
+      and c.hasCDR = False            // 무해화 장비가 없음
     }
 }
 
-// 5. Analysis Result
-
-one sig AnalysisResult {
-    FindStorageViolations: set System -> Data,
-    FindFlowViolations: set Connection -> Data,
-    FindLocationViolations: set System,
-    FindBypassViolations: set Connection,
-    FindUnencryptedChannels: set Connection,
-    FindAuthIntegrityGaps: set System,
-    FindContentControlFailures: set Connection -> Data
-}
-
-fact DefineAnalysisResult {
-    AnalysisResult.FindStorageViolations = FindStorageViolations
-    AnalysisResult.FindFlowViolations = FindFlowViolations
-    AnalysisResult.FindLocationViolations = FindLocationViolations
-    AnalysisResult.FindBypassViolations = FindBypassViolations
-    AnalysisResult.FindUnencryptedChannels = FindUnencryptedChannels
-    AnalysisResult.FindAuthIntegrityGaps = FindAuthIntegrityGaps
-    AnalysisResult.FindContentControlFailures = FindContentControlFailures
-}
-
-run CheckViolations { some AnalysisResult }
+// 실행 명령 (결과 XML 생성을 위해 빈 run 실행)
+run {}
