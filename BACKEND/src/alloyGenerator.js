@@ -1,99 +1,116 @@
 const fs = require('fs');
 const path = require('path');
 
-async function generateAlloyFile(data) {
-    // Output to the main alloy directory where n2sf_rules.als resides
-    // __dirname is BACKEND/src
-    // ../../alloy is c:/OTD-Alloy/alloy
-    const outputPath = path.resolve(__dirname, '../../alloy/user_instance.als');
+function generateAlloyFile(jsonData) {
+    let alloyContent = `module user_instance
+open n2sf_rules
 
-    let content = 'module user_instance\n\n';
-    content += 'open n2sf_rules\n\n';
-
-    // Helper to format sets
-    const formatSet = (ids, prefix) => {
-        if (!ids || ids.length === 0) return 'none';
-        return ids.map(id => `${prefix}${id}`).join(' + ');
-    };
+`;
 
     // 1. Locations
-    if (data.locations) {
-        data.locations.forEach(loc => {
-            content += `one sig Location${loc.id} extends Location {}\n`;
-            content += `fact {\n`;
-            content += `    Location${loc.id}.id = ${loc.id}\n`;
-            content += `    Location${loc.id}.type = ${loc.type}\n`;
-            content += `    Location${loc.id}.grade = ${loc.grade}\n`;
-            content += `}\n\n`;
+    if (jsonData.locations && jsonData.locations.length > 0) {
+        alloyContent += `one sig ${jsonData.locations.map(l => 'Location' + l.id).join(', ')} extends Location {}\n`;
+
+        // Location Facts
+        jsonData.locations.forEach(loc => {
+            alloyContent += `fact { Location${loc.id}.id = ${loc.id} and Location${loc.id}.type = ${loc.type} and Location${loc.id}.grade = ${loc.grade} }\n`;
         });
+        // Close the set
+        alloyContent += `fact { Location = ${jsonData.locations.map(l => 'Location' + l.id).join(' + ')} }\n`;
+    } else {
+        alloyContent += `fact { no Location }\n`;
     }
+    alloyContent += '\n';
 
     // 2. Data
-    if (data.data) {
-        data.data.forEach(d => {
-            content += `one sig Data${d.id} extends Data {}\n`;
-            content += `fact {\n`;
-            content += `    Data${d.id}.id = ${d.id}\n`;
-            content += `    Data${d.id}.grade = ${d.grade}\n`;
-            content += `}\n\n`;
+    if (jsonData.data && jsonData.data.length > 0) {
+        alloyContent += `one sig ${jsonData.data.map(d => 'Data' + d.id).join(', ')} extends Data {}\n`;
+
+        // Data Facts
+        jsonData.data.forEach(d => {
+            alloyContent += `fact { Data${d.id}.id = ${d.id} and Data${d.id}.grade = ${d.grade} }\n`;
         });
+        // Close the set
+        alloyContent += `fact { Data = ${jsonData.data.map(d => 'Data' + d.id).join(' + ')} }\n`;
+    } else {
+        alloyContent += `fact { no Data }\n`;
     }
+    alloyContent += '\n';
 
     // 3. Systems
-    if (data.systems) {
-        data.systems.forEach(sys => {
-            content += `one sig System${sys.id} extends System {}\n`;
-            content += `fact {\n`;
-            content += `    System${sys.id}.id = ${sys.id}\n`;
-            content += `    System${sys.id}.location = Location${sys.location}\n`;
-            content += `    System${sys.id}.grade = ${sys.grade}\n`;
-            content += `    System${sys.id}.type = ${sys.type}\n`;
-            content += `    System${sys.id}.authType = ${sys.authType}\n`;
-            content += `    System${sys.id}.stores = ${formatSet(sys.stores, 'Data')}\n`;
-            content += `}\n\n`;
+    if (jsonData.systems && jsonData.systems.length > 0) {
+        alloyContent += `one sig ${jsonData.systems.map(s => 'System' + s.id).join(', ')} extends System {}\n`;
+
+        // System Facts
+        jsonData.systems.forEach(sys => {
+            const stores = sys.stores && sys.stores.length > 0 ? sys.stores.map(id => `Data${id}`).join(' + ') : 'none';
+            alloyContent += `fact { 
+    System${sys.id}.id = ${sys.id} 
+    System${sys.id}.location = Location${sys.location} 
+    System${sys.id}.grade = ${sys.grade} 
+    System${sys.id}.type = ${sys.type} 
+    System${sys.id}.authType = ${sys.authType} 
+    System${sys.id}.stores = ${stores} 
+}\n`;
         });
+        // Close the set
+        alloyContent += `fact { System = ${jsonData.systems.map(s => 'System' + s.id).join(' + ')} }\n`;
+    } else {
+        alloyContent += `fact { no System }\n`;
     }
+    alloyContent += '\n';
 
     // 4. Connections
-    const connectionNames = [];
-    if (data.connections) {
-        data.connections.forEach((conn, index) => {
-            const connName = `Connection${index + 1}`;
-            connectionNames.push(connName);
-            content += `one sig ${connName} extends Connection {}\n`;
-            content += `fact {\n`;
-            content += `    ${connName}.from = System${conn.from}\n`;
-            content += `    ${connName}.to = System${conn.to}\n`;
-            content += `    ${connName}.carries = ${formatSet(conn.carries, 'Data')}\n`;
-            content += `    ${connName}.protocol = ${conn.protocol}\n`;
-            content += `    ${connName}.isEncrypted = ${conn.isEncrypted ? 'True' : 'False'}\n`;
-            content += `    ${connName}.hasCDR = ${conn.hasCDR ? 'True' : 'False'}\n`;
-            content += `}\n\n`;
+    if (jsonData.connections && jsonData.connections.length > 0) {
+        alloyContent += `one sig ${jsonData.connections.map((c, i) => 'Connection' + (c.id || i)).join(', ')} extends Connection {}\n`;
+
+        // Connection Facts
+        jsonData.connections.forEach((conn, index) => {
+            const connId = conn.id || index;
+            const carries = conn.carries && conn.carries.length > 0 ? conn.carries.map(id => `Data${id}`).join(' + ') : 'none';
+            alloyContent += `fact { 
+    Connection${connId}.from = System${conn.from} 
+    Connection${connId}.to = System${conn.to} 
+    Connection${connId}.carries = ${carries} 
+    Connection${connId}.protocol = ${conn.protocol} 
+    Connection${connId}.isEncrypted = ${conn.isEncrypted ? 'True' : 'False'} 
+    Connection${connId}.hasCDR = ${conn.hasCDR ? 'True' : 'False'} 
+}\n`;
         });
+        // Close the set
+        alloyContent += `fact { Connection = ${jsonData.connections.map((c, i) => 'Connection' + (c.id || i)).join(' + ')} }\n`;
+    } else {
+        alloyContent += `fact { no Connection }\n`;
     }
 
-    // Explicitly close the sets to prevent unwanted atoms
-    const locationNames = data.locations ? data.locations.map(l => `Location${l.id}`) : [];
-    const dataNames = data.data ? data.data.map(d => `Data${d.id}`) : [];
-    const systemNames = data.systems ? data.systems.map(s => `System${s.id}`) : [];
+    // Add AnalysisResult sig to capture violations
+    alloyContent += `
+one sig AnalysisResult {
+    FindStorageViolations: set System -> Data,
+    FindFlowViolations: set Connection -> Data,
+    FindLocationViolations: set System,
+    FindBypassViolations: set Connection,
+    FindUnencryptedChannels: set Connection,
+    FindAuthIntegrityGaps: set System,
+    FindContentControlFailures: set Connection -> Data
+}
 
-    content += `fact {\n`;
-    content += `    Location = ${locationNames.length > 0 ? locationNames.join(' + ') : 'none'}\n`;
-    content += `    Data = ${dataNames.length > 0 ? dataNames.join(' + ') : 'none'}\n`;
-    content += `    System = ${systemNames.length > 0 ? systemNames.join(' + ') : 'none'}\n`;
-    content += `    Connection = ${connectionNames.length > 0 ? connectionNames.join(' + ') : 'none'}\n`;
-    content += `}\n\n`;
+fact {
+    AnalysisResult.FindStorageViolations = FindStorageViolations
+    AnalysisResult.FindFlowViolations = FindFlowViolations
+    AnalysisResult.FindLocationViolations = FindLocationViolations
+    AnalysisResult.FindBypassViolations = FindBypassViolations
+    AnalysisResult.FindUnencryptedChannels = FindUnencryptedChannels
+    AnalysisResult.FindAuthIntegrityGaps = FindAuthIntegrityGaps
+    AnalysisResult.FindContentControlFailures = FindContentControlFailures
+}
 
-    // Append Check Commands
-    content += 'check NoStorageViolation\n';
-    content += 'check NoTransmissionViolation\n';
-    content += 'check NoLocationInappropriateness\n';
-    content += 'check NoBypassConnection\n';
-    content += 'check NoUnencryptedTransmission\n';
-    content += 'check NoAuthIntegrityMissing\n';
-    content += 'check NoContentControlMissing\n';
+run CheckViolations { some AnalysisResult }
+`;
 
-    fs.writeFileSync(outputPath, content);
+    const outputPath = path.join(__dirname, '../../alloy/user_instance.als');
+    fs.writeFileSync(outputPath, alloyContent);
+    console.log(`Alloy file generated at: ${outputPath}`);
     return outputPath;
 }
 

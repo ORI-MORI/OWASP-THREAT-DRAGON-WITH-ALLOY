@@ -1,0 +1,355 @@
+<alloy builddate="2015-02-22 18:21 EST">
+
+<instance bitwidth="4" maxseq="4" command="Run CheckViolations" filename="">
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="String" ID="3" parentID="2" builtin="yes">
+</sig>
+
+<sig label="this/AnalysisResult" ID="4" parentID="2" one="yes">
+   <atom label="AnalysisResult$0"/>
+</sig>
+
+<field label="FindStorageViolations" ID="5" parentID="4">
+   <types> <type ID="4"/> <type ID="6"/> <type ID="7"/> </types>
+</field>
+
+<field label="FindFlowViolations" ID="8" parentID="4">
+   <types> <type ID="4"/> <type ID="9"/> <type ID="7"/> </types>
+</field>
+
+<field label="FindLocationViolations" ID="10" parentID="4">
+   <types> <type ID="4"/> <type ID="6"/> </types>
+</field>
+
+<field label="FindBypassViolations" ID="11" parentID="4">
+   <types> <type ID="4"/> <type ID="9"/> </types>
+</field>
+
+<field label="FindUnencryptedChannels" ID="12" parentID="4">
+   <types> <type ID="4"/> <type ID="9"/> </types>
+</field>
+
+<field label="FindAuthIntegrityGaps" ID="13" parentID="4">
+   <tuple> <atom label="AnalysisResult$0"/> <atom label="System99$0"/> </tuple>
+   <types> <type ID="4"/> <type ID="6"/> </types>
+</field>
+
+<field label="FindContentControlFailures" ID="14" parentID="4">
+   <types> <type ID="4"/> <type ID="9"/> <type ID="7"/> </types>
+</field>
+
+<sig label="n2sf_rules/n2sf_base/Open" ID="15" parentID="16" one="yes">
+   <atom label="n2sf_rules/n2sf_base/Open$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/Sensitive" ID="17" parentID="16" one="yes">
+   <atom label="n2sf_rules/n2sf_base/Sensitive$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/Classified" ID="18" parentID="16" one="yes">
+   <atom label="n2sf_rules/n2sf_base/Classified$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/Grade" ID="16" parentID="2" abstract="yes">
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/Internet" ID="19" parentID="20" one="yes">
+   <atom label="n2sf_rules/n2sf_base/Internet$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/Intranet" ID="21" parentID="20" one="yes">
+   <atom label="n2sf_rules/n2sf_base/Intranet$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/DMZ" ID="22" parentID="20" one="yes">
+   <atom label="n2sf_rules/n2sf_base/DMZ$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/LocationType" ID="20" parentID="2" abstract="yes" enum="yes">
+</sig>
+
+<sig label="this/Location1" ID="23" parentID="24" one="yes">
+   <atom label="Location1$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/Location" ID="24" parentID="2" abstract="yes">
+</sig>
+
+<field label="id" ID="25" parentID="24">
+   <tuple> <atom label="Location1$0"/> <atom label="1"/> </tuple>
+   <types> <type ID="24"/> <type ID="1"/> </types>
+</field>
+
+<field label="type" ID="26" parentID="24">
+   <tuple> <atom label="Location1$0"/> <atom label="n2sf_rules/n2sf_base/Internet$0"/> </tuple>
+   <types> <type ID="24"/> <type ID="20"/> </types>
+</field>
+
+<field label="grade" ID="27" parentID="24">
+   <tuple> <atom label="Location1$0"/> <atom label="n2sf_rules/n2sf_base/Open$0"/> </tuple>
+   <types> <type ID="24"/> <type ID="16"/> </types>
+</field>
+
+<sig label="this/Data999" ID="28" parentID="7" one="yes">
+   <atom label="Data999$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/Data" ID="7" parentID="2" abstract="yes">
+</sig>
+
+<field label="id" ID="29" parentID="7">
+   <tuple> <atom label="Data999$0"/> <atom label="7"/> </tuple>
+   <types> <type ID="7"/> <type ID="1"/> </types>
+</field>
+
+<field label="grade" ID="30" parentID="7">
+   <tuple> <atom label="Data999$0"/> <atom label="n2sf_rules/n2sf_base/Classified$0"/> </tuple>
+   <types> <type ID="7"/> <type ID="16"/> </types>
+</field>
+
+<sig label="n2sf_rules/n2sf_base/Server" ID="31" parentID="32" one="yes">
+   <atom label="n2sf_rules/n2sf_base/Server$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/PC" ID="33" parentID="32" one="yes">
+   <atom label="n2sf_rules/n2sf_base/PC$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/Gateway" ID="34" parentID="32" one="yes">
+   <atom label="n2sf_rules/n2sf_base/Gateway$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/CDS" ID="35" parentID="32" one="yes">
+   <atom label="n2sf_rules/n2sf_base/CDS$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/SystemType" ID="32" parentID="2" abstract="yes" enum="yes">
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/NoAuth" ID="36" parentID="37" one="yes">
+   <atom label="n2sf_rules/n2sf_base/NoAuth$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/ID_PW" ID="38" parentID="37" one="yes">
+   <atom label="n2sf_rules/n2sf_base/ID_PW$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/MFA" ID="39" parentID="37" one="yes">
+   <atom label="n2sf_rules/n2sf_base/MFA$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/AuthType" ID="37" parentID="2" abstract="yes" enum="yes">
+</sig>
+
+<sig label="this/System99" ID="40" parentID="6" one="yes">
+   <atom label="System99$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/System" ID="6" parentID="2" abstract="yes">
+</sig>
+
+<field label="id" ID="41" parentID="6">
+   <tuple> <atom label="System99$0"/> <atom label="3"/> </tuple>
+   <types> <type ID="6"/> <type ID="1"/> </types>
+</field>
+
+<field label="location" ID="42" parentID="6">
+   <tuple> <atom label="System99$0"/> <atom label="Location1$0"/> </tuple>
+   <types> <type ID="6"/> <type ID="24"/> </types>
+</field>
+
+<field label="grade" ID="43" parentID="6">
+   <tuple> <atom label="System99$0"/> <atom label="n2sf_rules/n2sf_base/Open$0"/> </tuple>
+   <types> <type ID="6"/> <type ID="16"/> </types>
+</field>
+
+<field label="type" ID="44" parentID="6">
+   <tuple> <atom label="System99$0"/> <atom label="n2sf_rules/n2sf_base/PC$0"/> </tuple>
+   <types> <type ID="6"/> <type ID="32"/> </types>
+</field>
+
+<field label="authType" ID="45" parentID="6">
+   <tuple> <atom label="System99$0"/> <atom label="n2sf_rules/n2sf_base/NoAuth$0"/> </tuple>
+   <types> <type ID="6"/> <type ID="37"/> </types>
+</field>
+
+<field label="stores" ID="46" parentID="6">
+   <tuple> <atom label="System99$0"/> <atom label="Data999$0"/> </tuple>
+   <types> <type ID="6"/> <type ID="7"/> </types>
+</field>
+
+<sig label="n2sf_rules/n2sf_base/HTTP" ID="47" parentID="48" one="yes">
+   <atom label="n2sf_rules/n2sf_base/HTTP$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/HTTPS" ID="49" parentID="48" one="yes">
+   <atom label="n2sf_rules/n2sf_base/HTTPS$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/SSH" ID="50" parentID="48" one="yes">
+   <atom label="n2sf_rules/n2sf_base/SSH$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/FTP" ID="51" parentID="48" one="yes">
+   <atom label="n2sf_rules/n2sf_base/FTP$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/SFTP" ID="52" parentID="48" one="yes">
+   <atom label="n2sf_rules/n2sf_base/SFTP$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/TCP" ID="53" parentID="48" one="yes">
+   <atom label="n2sf_rules/n2sf_base/TCP$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/UDP" ID="54" parentID="48" one="yes">
+   <atom label="n2sf_rules/n2sf_base/UDP$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/Protocol" ID="48" parentID="2" abstract="yes" enum="yes">
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/True" ID="55" parentID="56" one="yes">
+   <atom label="n2sf_rules/n2sf_base/True$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/False" ID="57" parentID="56" one="yes">
+   <atom label="n2sf_rules/n2sf_base/False$0"/>
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/Bool" ID="56" parentID="2" abstract="yes" enum="yes">
+</sig>
+
+<sig label="n2sf_rules/n2sf_base/Connection" ID="9" parentID="2" abstract="yes">
+</sig>
+
+<field label="from" ID="58" parentID="9">
+   <types> <type ID="9"/> <type ID="6"/> </types>
+</field>
+
+<field label="to" ID="59" parentID="9">
+   <types> <type ID="9"/> <type ID="6"/> </types>
+</field>
+
+<field label="carries" ID="60" parentID="9">
+   <types> <type ID="9"/> <type ID="7"/> </types>
+</field>
+
+<field label="protocol" ID="61" parentID="9">
+   <types> <type ID="9"/> <type ID="48"/> </types>
+</field>
+
+<field label="isEncrypted" ID="62" parentID="9">
+   <types> <type ID="9"/> <type ID="56"/> </types>
+</field>
+
+<field label="hasCDR" ID="63" parentID="9">
+   <types> <type ID="9"/> <type ID="56"/> </types>
+</field>
+
+<sig label="n2sf_rules/n2sf_base/ordering/Ord" ID="64" parentID="2" one="yes" private="yes">
+   <atom label="n2sf_rules/n2sf_base/ordering/Ord$0"/>
+</sig>
+
+<field label="First" ID="65" parentID="64" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/ordering/Ord$0"/> <atom label="n2sf_rules/n2sf_base/Sensitive$0"/> </tuple>
+   <types> <type ID="64"/> <type ID="16"/> </types>
+</field>
+
+<field label="Next" ID="66" parentID="64" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/ordering/Ord$0"/> <atom label="n2sf_rules/n2sf_base/Sensitive$0"/> <atom label="n2sf_rules/n2sf_base/Classified$0"/> </tuple>
+   <tuple> <atom label="n2sf_rules/n2sf_base/ordering/Ord$0"/> <atom label="n2sf_rules/n2sf_base/Classified$0"/> <atom label="n2sf_rules/n2sf_base/Open$0"/> </tuple>
+   <types> <type ID="64"/> <type ID="16"/> <type ID="16"/> </types>
+</field>
+
+<sig label="n2sf_rules/n2sf_base/open$3/Ord" ID="67" parentID="2" one="yes" private="yes">
+   <atom label="n2sf_rules/n2sf_base/open$3/Ord$0"/>
+</sig>
+
+<field label="First" ID="68" parentID="67" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$3/Ord$0"/> <atom label="n2sf_rules/n2sf_base/Internet$0"/> </tuple>
+   <types> <type ID="67"/> <type ID="20"/> </types>
+</field>
+
+<field label="Next" ID="69" parentID="67" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$3/Ord$0"/> <atom label="n2sf_rules/n2sf_base/Internet$0"/> <atom label="n2sf_rules/n2sf_base/Intranet$0"/> </tuple>
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$3/Ord$0"/> <atom label="n2sf_rules/n2sf_base/Intranet$0"/> <atom label="n2sf_rules/n2sf_base/DMZ$0"/> </tuple>
+   <types> <type ID="67"/> <type ID="20"/> <type ID="20"/> </types>
+</field>
+
+<sig label="n2sf_rules/n2sf_base/open$4/Ord" ID="70" parentID="2" one="yes" private="yes">
+   <atom label="n2sf_rules/n2sf_base/open$4/Ord$0"/>
+</sig>
+
+<field label="First" ID="71" parentID="70" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$4/Ord$0"/> <atom label="n2sf_rules/n2sf_base/Server$0"/> </tuple>
+   <types> <type ID="70"/> <type ID="32"/> </types>
+</field>
+
+<field label="Next" ID="72" parentID="70" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$4/Ord$0"/> <atom label="n2sf_rules/n2sf_base/Server$0"/> <atom label="n2sf_rules/n2sf_base/PC$0"/> </tuple>
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$4/Ord$0"/> <atom label="n2sf_rules/n2sf_base/PC$0"/> <atom label="n2sf_rules/n2sf_base/Gateway$0"/> </tuple>
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$4/Ord$0"/> <atom label="n2sf_rules/n2sf_base/Gateway$0"/> <atom label="n2sf_rules/n2sf_base/CDS$0"/> </tuple>
+   <types> <type ID="70"/> <type ID="32"/> <type ID="32"/> </types>
+</field>
+
+<sig label="n2sf_rules/n2sf_base/open$5/Ord" ID="73" parentID="2" one="yes" private="yes">
+   <atom label="n2sf_rules/n2sf_base/open$5/Ord$0"/>
+</sig>
+
+<field label="First" ID="74" parentID="73" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$5/Ord$0"/> <atom label="n2sf_rules/n2sf_base/NoAuth$0"/> </tuple>
+   <types> <type ID="73"/> <type ID="37"/> </types>
+</field>
+
+<field label="Next" ID="75" parentID="73" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$5/Ord$0"/> <atom label="n2sf_rules/n2sf_base/NoAuth$0"/> <atom label="n2sf_rules/n2sf_base/ID_PW$0"/> </tuple>
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$5/Ord$0"/> <atom label="n2sf_rules/n2sf_base/ID_PW$0"/> <atom label="n2sf_rules/n2sf_base/MFA$0"/> </tuple>
+   <types> <type ID="73"/> <type ID="37"/> <type ID="37"/> </types>
+</field>
+
+<sig label="n2sf_rules/n2sf_base/open$6/Ord" ID="76" parentID="2" one="yes" private="yes">
+   <atom label="n2sf_rules/n2sf_base/open$6/Ord$0"/>
+</sig>
+
+<field label="First" ID="77" parentID="76" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$6/Ord$0"/> <atom label="n2sf_rules/n2sf_base/HTTP$0"/> </tuple>
+   <types> <type ID="76"/> <type ID="48"/> </types>
+</field>
+
+<field label="Next" ID="78" parentID="76" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$6/Ord$0"/> <atom label="n2sf_rules/n2sf_base/HTTP$0"/> <atom label="n2sf_rules/n2sf_base/HTTPS$0"/> </tuple>
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$6/Ord$0"/> <atom label="n2sf_rules/n2sf_base/HTTPS$0"/> <atom label="n2sf_rules/n2sf_base/SSH$0"/> </tuple>
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$6/Ord$0"/> <atom label="n2sf_rules/n2sf_base/SSH$0"/> <atom label="n2sf_rules/n2sf_base/FTP$0"/> </tuple>
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$6/Ord$0"/> <atom label="n2sf_rules/n2sf_base/FTP$0"/> <atom label="n2sf_rules/n2sf_base/SFTP$0"/> </tuple>
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$6/Ord$0"/> <atom label="n2sf_rules/n2sf_base/SFTP$0"/> <atom label="n2sf_rules/n2sf_base/TCP$0"/> </tuple>
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$6/Ord$0"/> <atom label="n2sf_rules/n2sf_base/TCP$0"/> <atom label="n2sf_rules/n2sf_base/UDP$0"/> </tuple>
+   <types> <type ID="76"/> <type ID="48"/> <type ID="48"/> </types>
+</field>
+
+<sig label="n2sf_rules/n2sf_base/open$7/Ord" ID="79" parentID="2" one="yes" private="yes">
+   <atom label="n2sf_rules/n2sf_base/open$7/Ord$0"/>
+</sig>
+
+<field label="First" ID="80" parentID="79" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$7/Ord$0"/> <atom label="n2sf_rules/n2sf_base/True$0"/> </tuple>
+   <types> <type ID="79"/> <type ID="56"/> </types>
+</field>
+
+<field label="Next" ID="81" parentID="79" private="yes">
+   <tuple> <atom label="n2sf_rules/n2sf_base/open$7/Ord$0"/> <atom label="n2sf_rules/n2sf_base/True$0"/> <atom label="n2sf_rules/n2sf_base/False$0"/> </tuple>
+   <types> <type ID="79"/> <type ID="56"/> <type ID="56"/> </types>
+</field>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+</instance>
+
+</alloy>

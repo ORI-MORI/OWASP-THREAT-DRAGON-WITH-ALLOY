@@ -34,7 +34,8 @@ const EditorContent = () => {
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const { project } = useReactFlow();
     const { setSelectedElement } = useStore();
-    const [violations, setViolations] = useState([]);
+    const [analysisResult, setAnalysisResult] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useOnSelectionChange({
         onChange: ({ nodes, edges }) => {
@@ -88,7 +89,7 @@ const EditorContent = () => {
         // Reset styles
         setNodes((nds) => nds.map((n) => ({ ...n, style: {} })));
         setEdges((eds) => eds.map((e) => ({ ...e, style: {} })));
-        setViolations([]);
+        setAnalysisResult(null);
 
         const payload = convertGraphToJSON(nodes, edges);
         console.log('Payload:', payload);
@@ -96,27 +97,30 @@ const EditorContent = () => {
         const result = await analyzeGraph(payload);
         console.log('Result:', result);
 
-        if (result.success && result.result.length > 0) {
-            setViolations(result.result);
+        if (result.success) {
+            setAnalysisResult(result.result);
+            setIsModalOpen(true);
 
+            // Highlighting Logic
             const violatingIds = new Set();
+            const threats = result.result.threats;
 
-            result.result.forEach(v => {
-                // Parse details for SystemX or ConnectionX
-                // Example: StorageViolation[System100$0, Data101$0]
-                const matches = v.details.match(/(System|Connection)(\d+)/g);
-                if (matches) {
-                    matches.forEach(m => {
-                        const type = m.startsWith('System') ? 'systems' : 'connections';
-                        const id = parseInt(m.replace(/(System|Connection)/, ''));
+            Object.values(threats).flat().forEach(violation => {
+                // Extract IDs from violation object values (system, connection, data)
+                Object.values(violation).forEach(val => {
+                    // val is like "System99" or "Connection1"
+                    const match = val.match(/(System|Connection)(\d+)/);
+                    if (match) {
+                        const type = match[1] === 'System' ? 'systems' : 'connections';
+                        const id = parseInt(match[2]);
 
-                        // Find real ID
+                        // Find real ID from mapping
                         const item = payload._mapping[type].find(i => i.id === id);
                         if (item) {
                             violatingIds.add(item.realId);
                         }
-                    });
-                }
+                    }
+                });
             });
 
             // Highlight nodes
@@ -134,8 +138,7 @@ const EditorContent = () => {
                 }
                 return e;
             }));
-        } else if (result.success) {
-            alert('No violations found!');
+
         } else {
             alert('Analysis failed: ' + result.error);
         }
@@ -154,17 +157,61 @@ const EditorContent = () => {
                     </button>
                 </div>
 
-                {violations.length > 0 && (
-                    <div className="absolute bottom-4 left-4 right-4 z-10 bg-white p-4 rounded shadow-lg border-l-4 border-red-500 max-h-48 overflow-y-auto">
-                        <h3 className="font-bold text-red-600 mb-2">Violations Detected ({violations.length})</h3>
-                        <ul className="text-sm space-y-2">
-                            {violations.map((v, i) => (
-                                <li key={i} className="border-b pb-1 last:border-0">
-                                    <span className="font-semibold">{v.rule}</span>
-                                    <p className="text-gray-600 text-xs truncate">{v.details}</p>
-                                </li>
-                            ))}
-                        </ul>
+                {/* Violations Modal */}
+                {isModalOpen && analysisResult && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg shadow-xl w-3/4 max-w-2xl max-h-[80vh] flex flex-col">
+                            <div className="p-4 border-b flex justify-between items-center bg-red-50 rounded-t-lg">
+                                <h3 className="font-bold text-red-700 text-lg">Security Analysis Results</h3>
+                                <button
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="text-gray-500 hover:text-gray-700 font-bold text-xl"
+                                >
+                                    &times;
+                                </button>
+                            </div>
+
+                            <div className="p-6 overflow-y-auto">
+                                {analysisResult.total_count === 0 ? (
+                                    <div className="text-green-600 font-semibold text-center text-lg">
+                                        No violations found. System is secure.
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        <div className="bg-red-50 border border-red-200 p-3 rounded text-red-800 font-medium">
+                                            Found {analysisResult.total_count} violations.
+                                        </div>
+
+                                        {Object.entries(analysisResult.threats).map(([key, items]) => {
+                                            if (items.length === 0) return null;
+                                            return (
+                                                <div key={key} className="border rounded-lg p-4 shadow-sm">
+                                                    <h4 className="font-bold text-gray-800 mb-2 border-b pb-1">
+                                                        {key.replace(/([A-Z])/g, ' $1').trim()} {/* CamelCase to Space */}
+                                                    </h4>
+                                                    <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+                                                        {items.map((item, idx) => (
+                                                            <li key={idx}>
+                                                                {Object.entries(item).map(([k, v]) => `${k}: ${v}`).join(', ')}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-4 border-t bg-gray-50 rounded-b-lg flex justify-end">
+                                <button
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 

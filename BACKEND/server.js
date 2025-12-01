@@ -23,10 +23,14 @@ app.post('/analyze', async (req, res) => {
         console.log('Generated Alloy file at:', alloyFilePath);
 
         // 2. Execute Alloy
-        const result = await executeAlloy(alloyFilePath);
-        console.log('Alloy execution result:', result);
+        const executionResult = await executeAlloy(alloyFilePath);
+        console.log('Alloy execution result:', executionResult);
 
-        res.json({ success: true, result });
+        if (executionResult.success) {
+            res.json({ success: true, result: executionResult.result });
+        } else {
+            res.status(500).json({ success: false, error: executionResult.error });
+        }
     } catch (error) {
         console.error('Error during analysis:', error);
         res.status(500).json({ success: false, error: error.message });
