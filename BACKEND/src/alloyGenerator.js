@@ -12,10 +12,16 @@ const path = require('path');
  */
 const generateAlloyFile = (jsonData) => {
     console.log("Starting generateAlloyFile...");
-    const alloyDir = path.join(process.cwd(), 'alloy');
+    // Use __dirname to resolve path relative to this script (src/alloyGenerator.js)
+    // alloy folder is at ../alloy
+    const alloyDir = path.join(__dirname, '..', 'alloy');
     const templatePath = path.join(alloyDir, 'user_instance.als');
     const outputPath = path.join(alloyDir, 'user_instance_real.als');
     console.log(`Template path: ${templatePath}`);
+
+    console.log(`Current Working Directory: ${process.cwd()}`);
+    console.log(`Constructed Template Path: ${templatePath}`);
+    console.log(`File exists? ${fs.existsSync(templatePath)}`);
 
     if (!fs.existsSync(templatePath)) {
         console.error(`Template file not found at: ${templatePath}`);
@@ -161,16 +167,14 @@ const generateAlloyFile = (jsonData) => {
     analysisResultCode += `    AnalysisResult.FindUnencryptedStorage = FindUnencryptedStorage\n`;
     analysisResultCode += `    AnalysisResult.FindAdminAccessViolation = FindAdminAccessViolation\n`;
     analysisResultCode += `}\n\n`;
-
     // Inject generated content into the template
     als = als.replace('// [ZONES_HERE]', zonesCode);
     als = als.replace('// [DATA_HERE]', dataCode);
     als = als.replace('// [SYSTEMS_HERE]', systemsCode);
     als = als.replace('// [CONNECTIONS_HERE]', connectionsCode);
 
-    // Append AnalysisResult before run command if not present (or just append it)
-    // Since we don't have a marker for it, we'll append it before the run command
-    als = als.replace('run {}', analysisResultCode + '\nrun {}');
+    // Append AnalysisResult and run command at the end
+    als += '\n' + analysisResultCode + '\nrun CheckViolations { some AnalysisResult }\n';
 
     fs.writeFileSync(outputPath, als);
     console.log(`Alloy file generated successfully at ${outputPath}`);

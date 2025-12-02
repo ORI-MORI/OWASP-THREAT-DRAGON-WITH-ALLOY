@@ -124,11 +124,11 @@ const EditorContent = () => {
 
                 Object.values(threats).flat().forEach(violation => {
                     Object.values(violation).forEach(val => {
-                        const match = val.match(/(System|Connection)(\d+)/);
+                        const match = val.match(/(System|Connection)[^0-9]*(\d+)/);
                         if (match) {
                             const type = match[1] === 'System' ? 'systems' : 'connections';
                             const id = parseInt(match[2]);
-                            const item = payload._mapping[type].find(i => i.id === id);
+                            const item = payload._mapping[type].find(i => i.id == id);
                             if (item) {
                                 violatingIds.add(item.realId);
                             }
@@ -147,7 +147,12 @@ const EditorContent = () => {
                 // Highlight edges
                 setEdges((eds) => eds.map((e) => {
                     if (violatingIds.has(e.id)) {
-                        return { ...e, style: { ...e.style, stroke: 'red', strokeWidth: 2 } };
+                        return {
+                            ...e,
+                            style: { ...e.style, stroke: 'red', strokeWidth: 2 },
+                            markerEnd: { type: MarkerType.ArrowClosed, color: 'red' },
+                            zIndex: 10
+                        };
                     }
                     return e;
                 }));
@@ -164,16 +169,16 @@ const EditorContent = () => {
     };
 
     const handleThreatClick = (violation) => {
-        if (!idMapping) return;
+        if (!idMapping || !analysisResult) return;
 
         const newFocusedPath = new Set();
 
         Object.values(violation).forEach(val => {
-            const match = val.match(/(System|Connection)(\d+)/);
+            const match = val.match(/(System|Connection)[^0-9]*(\d+)/);
             if (match) {
                 const type = match[1] === 'System' ? 'systems' : 'connections';
                 const id = parseInt(match[2]);
-                const item = idMapping[type].find(i => i.id === id);
+                const item = idMapping[type].find(i => i.id == id);
 
                 if (item) {
                     newFocusedPath.add(item.realId);
@@ -191,17 +196,26 @@ const EditorContent = () => {
 
         setFocusedPath(newFocusedPath);
 
-        // Update styles to reflect focus
-        // We need to re-apply the base "Red" for violations, and "Blue" for the focused path
-        // Since we don't want to lose the "Red" info of other threats, we need to know all violations again?
-        // Actually, the current nodes already have Red style applied. We can just override on top.
-        // But to be clean, let's re-run the style logic if possible, or just apply focus on top of existing.
-        // Simpler: Just update based on current state, adding Blue to focused.
+        // Re-calculate violating IDs to restore Red state for non-focused violations
+        const violatingIds = new Set();
+        const threats = analysisResult.threats;
+        Object.values(threats).flat().forEach(v => {
+            Object.values(v).forEach(val => {
+                const match = val.match(/(System|Connection)[^0-9]*(\d+)/);
+                if (match) {
+                    const type = match[1] === 'System' ? 'systems' : 'connections';
+                    const id = parseInt(match[2]);
+                    const item = idMapping[type].find(i => i.id == id);
+                    if (item) {
+                        violatingIds.add(item.realId);
+                    }
+                }
+            });
+        });
 
         setNodes((nds) => nds.map((n) => {
             const isFocused = newFocusedPath.has(n.id);
-            // Check if it was already red (violation)
-            const isViolation = n.style?.border?.includes('red');
+            const isViolation = violatingIds.has(n.id);
 
             let newStyle = { ...n.style };
 
@@ -209,44 +223,40 @@ const EditorContent = () => {
                 newStyle.border = '3px solid #3b82f6'; // Blue-500
                 newStyle.boxShadow = '0 0 15px #3b82f6';
             } else if (isViolation) {
-                // Keep Red
                 newStyle.border = '2px solid red';
                 newStyle.boxShadow = '0 0 10px red';
             } else {
-                // Reset if neither (though we usually don't clear violation unless re-analyzed)
-                // But if we clicked a different threat, we might want to un-focus previous one.
-                // So we should revert to Red if it was Red.
-                // This is tricky without keeping track of "base violation state".
-                // Hack: If it has a border and NOT focused, make it Red. If no border, keep none.
-                if (newStyle.border) {
-                    newStyle.border = '2px solid red';
-                    newStyle.boxShadow = '0 0 10px red';
-                }
+                newStyle.border = undefined;
+                newStyle.boxShadow = undefined;
             }
             return { ...n, style: newStyle };
         }));
 
         setEdges((eds) => eds.map((e) => {
             const isFocused = newFocusedPath.has(e.id);
-            const isViolation = e.style?.stroke === 'red';
+            const isViolation = violatingIds.has(e.id);
 
             let newStyle = { ...e.style };
+            let newMarkerEnd = { type: MarkerType.ArrowClosed };
+            let newZIndex = 0;
 
             if (isFocused) {
                 newStyle.stroke = '#3b82f6';
                 newStyle.strokeWidth = 4;
-                newStyle.zIndex = 999; // Bring to front
+                newMarkerEnd.color = '#3b82f6';
+                newZIndex = 999;
             } else if (isViolation) {
                 newStyle.stroke = 'red';
                 newStyle.strokeWidth = 2;
-                newStyle.zIndex = 1;
+                newMarkerEnd.color = 'red';
+                newZIndex = 10;
             } else {
-                if (newStyle.stroke) {
-                    newStyle.stroke = 'red';
-                    newStyle.strokeWidth = 2;
-                }
+                newStyle.stroke = undefined;
+                newStyle.strokeWidth = undefined;
+                newMarkerEnd.color = '#b1b1b7';
+                newZIndex = 0;
             }
-            return { ...e, style: newStyle };
+            return { ...e, style: newStyle, markerEnd: newMarkerEnd, zIndex: newZIndex };
         }));
     };
 

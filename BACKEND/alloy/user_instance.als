@@ -1,6 +1,7 @@
-```
 module user_instance
 open n2sf_base
+open n2sf_rules
+
 // ============================================================
 // [GENERATED CONTENT]
 // ============================================================
@@ -12,6 +13,3 @@ open n2sf_base
 // [SYSTEMS_HERE]
 
 // [CONNECTIONS_HERE]
-
-run {}
-```

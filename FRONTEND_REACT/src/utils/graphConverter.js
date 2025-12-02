@@ -104,7 +104,7 @@ export function convertGraphToJSON(nodes, edges) {
         }
 
         return {
-            id: e.id.replace(/\D/g, '') || (Math.floor(Math.random() * 1000)),
+            id: parseInt(e.id.replace(/\D/g, '')) || (Math.floor(Math.random() * 1000)),
             from: fromSys.id,
             to: toSys.id,
             carries: carries,
