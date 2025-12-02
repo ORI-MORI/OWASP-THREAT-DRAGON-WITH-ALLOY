@@ -48,6 +48,7 @@ export function convertGraphToJSON(nodes, edges) {
         if (!parentZone) {
             parentZone = locations.find((loc) => {
                 const zoneNode = zones.find((z) => z.id === loc.realId);
+                if (!zoneNode) return false;
                 return isInside(s, zoneNode);
             });
         }

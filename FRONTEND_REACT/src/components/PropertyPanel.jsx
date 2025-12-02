@@ -214,6 +214,67 @@ export default function PropertyPanel({ analysisResult }) {
                         </div>
                     </>
                 )}
+
+                {/* Edge Specific */}
+                {isEdge && (
+                    <>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Protocol</label>
+                            <select
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                value={formData.protocol || 'HTTPS'}
+                                onChange={(e) => handleChange('protocol', e.target.value)}
+                            >
+                                <option value="HTTPS">HTTPS</option>
+                                <option value="SSH">SSH</option>
+                                <option value="VPN_Tunnel">VPN Tunnel</option>
+                                <option value="ClearText">ClearText (HTTP/Telnet)</option>
+                                <option value="SQL">SQL</option>
+                            </select>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="isEncrypted"
+                                checked={formData.isEncrypted || false}
+                                onChange={(e) => handleChange('isEncrypted', e.target.checked)}
+                            />
+                            <label htmlFor="isEncrypted" className="text-sm font-medium text-gray-700">Is Encrypted?</label>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="hasCDR"
+                                checked={formData.hasCDR || false}
+                                onChange={(e) => handleChange('hasCDR', e.target.checked)}
+                            />
+                            <label htmlFor="hasCDR" className="text-sm font-medium text-gray-700">Has CDR?</label>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="hasAntiVirus"
+                                checked={formData.hasAntiVirus || false}
+                                onChange={(e) => handleChange('hasAntiVirus', e.target.checked)}
+                            />
+                            <label htmlFor="hasAntiVirus" className="text-sm font-medium text-gray-700">Has Anti-Virus?</label>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Carries Data (comma separated IDs)</label>
+                            <input
+                                type="text"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                value={formData.carries || ''}
+                                onChange={(e) => handleChange('carries', e.target.value)}
+                                placeholder="e.g. 1, 2"
+                            />
+                        </div>
+                    </>
+                )}
             </div>
         );
     };

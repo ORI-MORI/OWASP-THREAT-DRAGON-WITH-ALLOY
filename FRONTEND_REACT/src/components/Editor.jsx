@@ -8,6 +8,7 @@ import ReactFlow, {
     Background,
     useReactFlow,
     useOnSelectionChange,
+    MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Play } from 'lucide-react';
@@ -48,7 +49,7 @@ const EditorContent = () => {
         },
     });
 
-    const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
+    const onConnect = useCallback((params) => setEdges((eds) => addEdge({ ...params, markerEnd: { type: MarkerType.ArrowClosed } }, eds)), []);
 
     const onDragOver = useCallback((event) => {
         event.preventDefault();
