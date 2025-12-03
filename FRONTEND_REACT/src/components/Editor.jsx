@@ -273,11 +273,28 @@ const EditorContent = () => {
         setFocusedPath(new Set());
     };
 
+    const handleClearAll = () => {
+        if (window.confirm('Are you sure you want to clear the entire diagram?')) {
+            setNodes([]);
+            setEdges([]);
+            setAnalysisResult(null);
+            setFocusedPath(new Set());
+            setSelectedElement(null);
+            id = 0; // Reset ID counter if desired, though not strictly necessary
+        }
+    };
+
     return (
         <div className="flex flex-row h-screen w-screen">
             <Sidebar />
             <div className="flex-grow h-full relative" ref={reactFlowWrapper}>
-                <div className="absolute top-4 right-4 z-10">
+                <div className="absolute top-4 right-4 z-10 flex gap-2">
+                    <button
+                        onClick={handleClearAll}
+                        className="px-4 py-2 rounded shadow flex items-center gap-2 text-gray-700 bg-white hover:bg-gray-50 transition-colors border border-gray-200"
+                    >
+                        Clear All
+                    </button>
                     <button
                         onClick={handleAnalyze}
                         disabled={isAnalyzing}

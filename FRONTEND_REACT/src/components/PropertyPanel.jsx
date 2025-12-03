@@ -65,6 +65,21 @@ export default function PropertyPanel({ analysisResult, onThreatClick }) {
         handleChange('storedData', currentData.map(d => d.id === id ? { ...d, [field]: value } : d));
     };
 
+    const handleDelete = () => {
+        if (!selectedElement) return;
+
+        if (window.confirm('Are you sure you want to delete this element?')) {
+            if (selectedElement.source) {
+                // It's an edge
+                setEdges((edges) => edges.filter((edge) => edge.id !== selectedElement.id));
+            } else {
+                // It's a node
+                setNodes((nodes) => nodes.filter((node) => node.id !== selectedElement.id));
+            }
+            setSelectedElement(null);
+        }
+    };
+
     const renderPropertiesTab = () => {
         if (!selectedElement) {
             return (
@@ -390,6 +405,16 @@ export default function PropertyPanel({ analysisResult, onThreatClick }) {
                         </div>
                     </>
                 )}
+
+                {/* Delete Button */}
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                    <button
+                        onClick={handleDelete}
+                        className="w-full bg-red-50 text-red-600 border border-red-200 py-2 rounded hover:bg-red-100 transition-colors text-sm font-medium"
+                    >
+                        Delete {isEdge ? 'Connection' : 'Element'}
+                    </button>
+                </div>
             </div>
         );
     };
