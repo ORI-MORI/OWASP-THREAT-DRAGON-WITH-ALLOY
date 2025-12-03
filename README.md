@@ -1,5 +1,11 @@
 # OTD-Alloy (N2SF 지능형 감사 도구)
 
+> [!IMPORTANT]
+> **현재 개발 진행 중 (Work In Progress)**
+> 이 프로젝트는 현재 활발히 개발 중이며, 기능이 변경되거나 불안정할 수 있습니다.
+> This project is currently under active development. Features are subject to change and may be unstable.
+
+
 ## 개요
 이 프로젝트는 **OWASP Threat Dragon**과 **Alloy Analyzer**를 통합한 전문 보안 감사 도구입니다. **N2SF(국가 망 보안 시설)** 보안 표준에 따라 네트워크 다이어그램을 정형 기법(Formal Methods)으로 검증하도록 설계되었습니다.
 
