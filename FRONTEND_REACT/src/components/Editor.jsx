@@ -55,7 +55,7 @@ const EditorContent = () => {
         },
     });
 
-    const onConnect = useCallback((params) => setEdges((eds) => addEdge({ ...params, type: 'dataFlow', animated: true, markerEnd: { type: MarkerType.ArrowClosed } }, eds)), []);
+    const onConnect = useCallback((params) => setEdges((eds) => addEdge({ ...params, type: 'dataFlow', animated: true, markerEnd: { type: MarkerType.ArrowClosed, color: '#000000' }, data: { isBidirectional: true } }, eds)), []);
 
     const onDragOver = useCallback((event) => {
         event.preventDefault();
@@ -177,7 +177,7 @@ const EditorContent = () => {
             const { border, boxShadow, borderRadius, ...preservedStyle } = n.style || {};
             return { ...n, style: preservedStyle };
         }));
-        setEdges((eds) => eds.map((e) => ({ ...e, style: {}, markerEnd: { type: MarkerType.ArrowClosed, color: '#b1b1b7' } })));
+        setEdges((eds) => eds.map((e) => ({ ...e, style: {}, markerEnd: { type: MarkerType.ArrowClosed, color: '#000000' } })));
         setAnalysisResult(null);
         setFocusedPath(new Set());
         setSelectedThreatId(null);

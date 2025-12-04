@@ -86,12 +86,13 @@ export function convertGraphToJSON(nodes, edges) {
     });
 
     // 3. Map Connections (Edges)
-    const connections = edges.map((e, index) => {
+    // 3. Map Connections (Edges)
+    const connections = edges.flatMap((e, index) => {
         const fromSys = mappedSystems.find((s) => s.realId === e.source);
         const toSys = mappedSystems.find((s) => s.realId === e.target);
         const data = e.data || {};
 
-        if (!fromSys || !toSys) return null;
+        if (!fromSys || !toSys) return [];
 
         // Parse carries data
         const carriesStr = data.carries || '';
@@ -103,11 +104,12 @@ export function convertGraphToJSON(nodes, edges) {
             carries = carriesStr.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
         }
 
-        return {
-            // Spread raw data first so we can overwrite/transform specific fields
-            ...data,
+        const baseId = parseInt(e.id.replace(/\D/g, '')) || (1000 + index);
+        const isBidirectional = data.isBidirectional !== false; // Default to true
 
-            id: parseInt(e.id.replace(/\D/g, '')) || (1000 + index),
+        const forwardConnection = {
+            ...data,
+            id: baseId,
             from: fromSys.id,
             to: toSys.id,
             carries: carries,
@@ -118,7 +120,33 @@ export function convertGraphToJSON(nodes, edges) {
             hasAntiVirus: data.hasAntiVirus === true,
             realId: e.id,
         };
-    }).filter(c => c !== null);
+
+        if (isBidirectional) {
+            const backwardConnection = {
+                ...forwardConnection,
+                id: baseId + 50000, // Offset to avoid collision
+                from: toSys.id,
+                to: fromSys.id,
+                // Backward connection carries same data? 
+                // Usually return traffic might be different, but for simple modeling, 
+                // we assume the channel allows data flow in both directions.
+                // However, 'carries' usually implies specific data assets moving.
+                // If A sends Data1 to B, does B send Data1 back to A? Probably not.
+                // But the user said "양방향 으로 통신이 즉 데이터가 흐를 수 있다는 걸 의미하는데".
+                // This implies the *capability* to flow.
+                // If specific data is assigned to the edge, it's ambiguous if it flows both ways.
+                // For now, let's assume the properties apply to the channel.
+                // But 'carries' is specific payload.
+                // If I assign Data1 to the edge, it means Data1 flows.
+                // If bidirectional, does Data1 flow A->B AND B->A?
+                // Let's assume yes for now to be safe (worst case analysis).
+                realId: e.id,
+            };
+            return [forwardConnection, backwardConnection];
+        }
+
+        return [forwardConnection];
+    });
 
     // 4. Collect Data definitions
     const allDataMap = new Map();

@@ -5,7 +5,7 @@ import useStore from '../store';
 
 export default function PropertyPanel({ analysisResult, onThreatClick, selectedThreatId }) {
     const { selectedElement, setSelectedElement } = useStore();
-    const { setNodes, setEdges, getNodes } = useReactFlow();
+    const { setNodes, setEdges, getNodes, getEdges } = useReactFlow();
     const [formData, setFormData] = useState({});
     const [activeTab, setActiveTab] = useState('properties'); // 'properties' | 'threats'
 
@@ -379,6 +379,130 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                 <option value="SQL">SQL</option>
                             </select>
                         </div>
+
+                        {(() => {
+                            // Helper to get current source/target nodes
+                            // We need to look up the nodes to get their labels
+                            const sourceNode = getNodes().find(n => n.id === selectedElement.source);
+                            const targetNode = getNodes().find(n => n.id === selectedElement.target);
+                            const sourceLabel = sourceNode?.data?.label || sourceNode?.id || 'Source';
+                            const targetLabel = targetNode?.data?.label || targetNode?.id || 'Target';
+
+                            return (
+                                <div className="flex flex-col gap-3 border-t border-gray-200 pt-3 mt-3">
+                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Connection Settings</h4>
+
+                                    {/* Flow Type Selection */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Flow Type</label>
+                                        <select
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                            value={formData.isBidirectional !== false ? 'bidirectional' : 'unidirectional'}
+                                            onChange={(e) => handleChange('isBidirectional', e.target.value === 'bidirectional')}
+                                        >
+                                            <option value="bidirectional">Bidirectional (Both Ways)</option>
+                                            <option value="unidirectional">Unidirectional (One Way)</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Direction Selection (Only for Unidirectional) */}
+                                    {/* Direction Control (Only for Unidirectional) */}
+                                    {formData.isBidirectional === false && (
+                                        <div className="mt-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Direction</label>
+                                            <div className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
+                                                <span className="text-xs text-gray-600 font-medium truncate max-w-[150px]" title={`${sourceLabel} → ${targetLabel}`}>
+                                                    {sourceLabel} → {targetLabel}
+                                                </span>
+                                                <button
+                                                    onClick={() => {
+                                                        // Perform Swap by creating a NEW edge to force re-render
+                                                        const oldEdge = getEdges().find(e => e.id === selectedElement.id);
+                                                        if (oldEdge) {
+                                                            // Helper to map handles for the new direction
+                                                            // We need to find a valid SOURCE handle on the OLD TARGET node (which becomes NEW SOURCE)
+                                                            // And a valid TARGET handle on the OLD SOURCE node (which becomes NEW TARGET)
+
+                                                            const mapToSourceHandle = (handleId) => {
+                                                                if (!handleId) return 'right-source';
+                                                                if (handleId.includes('-target')) return handleId.replace('-target', '-source');
+                                                                if (handleId.includes('-source')) return handleId; // Already source? Should not happen for a target handle but safe to keep
+                                                                return `${handleId}-source`; // Legacy fallback
+                                                            };
+
+                                                            const mapToTargetHandle = (handleId) => {
+                                                                if (!handleId) return 'left-target';
+                                                                if (handleId.includes('-source')) return handleId.replace('-source', '-target');
+                                                                if (handleId.includes('-target')) return handleId;
+                                                                return `${handleId}-target`; // Legacy fallback
+                                                            };
+
+                                                            const newEdge = {
+                                                                ...oldEdge,
+                                                                id: `e-${Date.now()}`, // Generate new ID
+                                                                source: oldEdge.target,
+                                                                target: oldEdge.source,
+                                                                sourceHandle: mapToSourceHandle(oldEdge.targetHandle),
+                                                                targetHandle: mapToTargetHandle(oldEdge.sourceHandle),
+                                                                data: { ...oldEdge.data, isBidirectional: false }
+                                                            };
+
+                                                            setEdges((eds) => eds.filter(e => e.id !== oldEdge.id).concat(newEdge));
+                                                            setSelectedElement(newEdge);
+                                                        }
+                                                    }}
+                                                    className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-100 shadow-sm flex items-center gap-1 transition-colors"
+                                                    title="Reverse Direction"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                                                    Swap
+                                                </button>
+                                            </div>
+                                            <p className="text-[10px] text-gray-500 mt-1">
+                                                Click Swap to reverse the flow direction.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
+
+                        {/* {!formData.isBidirectional && (
+                            <button
+                                onClick={() => {
+                                    // Swap source and target
+                                    const edge = getNodes().find(n => n.id === selectedElement.id) || selectedElement; // selectedElement is the edge
+                                    // Actually, selectedElement IS the edge object with source/target props
+                                    // But we need to update the edge in the React Flow state.
+                                    // The 'handleChange' only updates 'data'. We need a specific handler for swapping.
+
+                                    // Since we can't easily swap source/target IDs of an existing edge without re-creating it,
+                                    // and PropertyPanel only has access to setEdges via props or context.
+                                    // We have setEdges from useReactFlow().
+
+                                    setEdges((eds) => eds.map(e => {
+                                        if (e.id === selectedElement.id) {
+                                            return {
+                                                ...e,
+                                                source: e.target,
+                                                target: e.source,
+                                                sourceHandle: e.targetHandle, // Simplistic swap, might need refinement if handles are specific
+                                                targetHandle: e.sourceHandle
+                                            };
+                                        }
+                                        return e;
+                                    }));
+
+                                    // We also need to update selectedElement to reflect the change immediately if needed,
+                                    // but since the ID stays the same, it might just work.
+                                    // However, React Flow might re-render the edge.
+                                }}
+                                className="w-full py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 flex items-center justify-center gap-1"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                                Swap Direction
+                            </button>
+                        )} */ }
 
                         <div className="flex items-center gap-2">
                             <input
