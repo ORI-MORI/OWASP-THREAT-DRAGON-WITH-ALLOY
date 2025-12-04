@@ -31,12 +31,15 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
 
     // Calculate Modeling Completeness (Connected Node Ratio)
     const completenessData = useMemo(() => {
-        if (!nodes || nodes.length === 0) {
-            console.log("ScoreDashboard: No nodes, returning '-'");
+        // Filter out Zone nodes
+        const systemNodes = nodes.filter(n => n.type !== 'zone');
+
+        if (!systemNodes || systemNodes.length === 0) {
+            console.log("ScoreDashboard: No system nodes, returning '-'");
             return { ratio: null, text: "-", connected: 0, total: 0 };
         }
-        console.log("ScoreDashboard: Nodes exist", nodes.length);
-        const totalNodes = nodes.length;
+        console.log("ScoreDashboard: System nodes exist", systemNodes.length);
+        const totalNodes = systemNodes.length;
 
         // Find all nodes that are connected (source or target of an edge)
         const connectedNodeIds = new Set();
@@ -45,9 +48,9 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
             connectedNodeIds.add(edge.target);
         });
 
-        // Count how many of the current nodes are in the connected set
+        // Count how many of the current system nodes are in the connected set
         let connectedCount = 0;
-        nodes.forEach(node => {
+        systemNodes.forEach(node => {
             if (connectedNodeIds.has(node.id)) {
                 connectedCount++;
             }

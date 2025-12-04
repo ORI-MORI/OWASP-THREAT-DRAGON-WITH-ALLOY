@@ -179,7 +179,7 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                 value={formData.loc || ''}
                                 onChange={(e) => handleChange('loc', e.target.value)}
                             >
-                                <option value="">(Auto-detect)</option>
+                                <option value="">(None)</option>
                                 {getNodes().filter(n => n.type === 'zone').map(zone => (
                                     <option key={zone.id} value={zone.id}>
                                         {zone.data.label || `Zone ${zone.id}`}

@@ -40,7 +40,7 @@ const EditorContent = () => {
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const { project } = useReactFlow();
-    const { setSelectedElement } = useStore();
+    const { selectedElement, setSelectedElement } = useStore();
     const [analysisResult, setAnalysisResult] = useState(null);
 
     useOnSelectionChange({
@@ -80,8 +80,11 @@ const EditorContent = () => {
             });
 
             let defaultType = label;
+            let zIndex = 1; // Default z-index for systems
+
             if (type === 'zone') {
                 defaultType = 'Internet'; // Default Zone Type
+                zIndex = -1; // Send zones to back
             } else if (type === 'system') {
                 if (label === 'PC') defaultType = 'Terminal';
                 else if (label === 'Gateway') defaultType = 'NetworkDevice';
@@ -93,12 +96,73 @@ const EditorContent = () => {
                 id: getId(),
                 type,
                 position,
+                zIndex, // Apply z-index
                 data: { label, grade: 'Open', type: defaultType },
             };
 
             setNodes((nds) => nds.concat(newNode));
         },
         [project, setNodes]
+    );
+
+    // Auto-detect Zone on Drag Stop
+    const onNodeDragStop = useCallback(
+        (event, node) => {
+            if (node.type === 'zone') return; // Zones don't need location
+
+            // Calculate node center
+            const nodeCenterX = node.position.x + (node.width || 150) / 2;
+            const nodeCenterY = node.position.y + (node.height || 40) / 2;
+
+            // Find intersecting zones
+            const zones = nodes.filter((n) => n.type === 'zone');
+            let foundZone = null;
+
+            for (const zone of zones) {
+                const zoneX = zone.position.x;
+                const zoneY = zone.position.y;
+                const zoneW = zone.width || 100; // Default width if not resized
+                const zoneH = zone.height || 100; // Default height if not resized
+
+                if (
+                    nodeCenterX >= zoneX &&
+                    nodeCenterX <= zoneX + zoneW &&
+                    nodeCenterY >= zoneY &&
+                    nodeCenterY <= zoneY + zoneH
+                ) {
+                    foundZone = zone;
+                    break; // Assume belonging to the first found zone (nested zones not fully supported yet)
+                }
+            }
+
+            const newLoc = foundZone ? foundZone.id : '';
+
+            // Update node location if changed
+            if (node.data.loc !== newLoc) {
+                setNodes((nds) =>
+                    nds.map((n) => {
+                        if (n.id === node.id) {
+                            return { ...n, data: { ...n.data, loc: newLoc } };
+                        }
+                        return n;
+                    })
+                );
+
+                // Sync selectedElement if it's the dragged node
+                // We use useStore.getState().selectedElement to get the latest value if needed, 
+                // but here we rely on the closure or the hook. 
+                // Since onNodeDragStop depends on [nodes, setNodes], and selectedElement changes often,
+                // we should probably add selectedElement to dependency or use functional update.
+                // However, simply checking ID match is safe.
+                if (selectedElement && selectedElement.id === node.id) {
+                    setSelectedElement({
+                        ...node,
+                        data: { ...node.data, loc: newLoc }
+                    });
+                }
+            }
+        },
+        [nodes, setNodes, selectedElement, setSelectedElement]
     );
 
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -108,8 +172,11 @@ const EditorContent = () => {
 
     const handleAnalyze = async () => {
         setIsAnalyzing(true);
-        // Reset styles
-        setNodes((nds) => nds.map((n) => ({ ...n, style: {} })));
+        // Reset styles but PRESERVE dimensions (width, height) and zIndex
+        setNodes((nds) => nds.map((n) => {
+            const { border, boxShadow, borderRadius, ...preservedStyle } = n.style || {};
+            return { ...n, style: preservedStyle };
+        }));
         setEdges((eds) => eds.map((e) => ({ ...e, style: {}, markerEnd: { type: MarkerType.ArrowClosed, color: '#b1b1b7' } })));
         setAnalysisResult(null);
         setFocusedPath(new Set());
@@ -360,6 +427,7 @@ const EditorContent = () => {
                     onConnect={onConnect}
                     onDrop={onDrop}
                     onDragOver={onDragOver}
+                    onNodeDragStop={onNodeDragStop}
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
                     fitView
