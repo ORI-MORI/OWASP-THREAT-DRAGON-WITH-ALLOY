@@ -31,8 +31,12 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
 
     // Calculate Modeling Completeness (Connected Node Ratio)
     const completenessData = useMemo(() => {
+        if (!nodes || nodes.length === 0) {
+            console.log("ScoreDashboard: No nodes, returning '-'");
+            return { ratio: null, text: "-", connected: 0, total: 0 };
+        }
+        console.log("ScoreDashboard: Nodes exist", nodes.length);
         const totalNodes = nodes.length;
-        if (totalNodes === 0) return { ratio: 100, text: "0/0", connected: 0, total: 0 };
 
         // Find all nodes that are connected (source or target of an edge)
         const connectedNodeIds = new Set();
@@ -77,12 +81,14 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
 
     // Helper for completeness color (different thresholds)
     const getCompletenessColor = (ratio) => {
+        if (ratio === null) return 'text-gray-400';
         if (ratio >= 90) return 'text-green-600';
         if (ratio >= 60) return 'text-yellow-600';
         return 'text-red-600';
     };
 
     const getCompletenessBg = (ratio) => {
+        if (ratio === null) return 'bg-gray-50 border-gray-200';
         if (ratio >= 90) return 'bg-green-50 border-green-200';
         if (ratio >= 60) return 'bg-yellow-50 border-yellow-200';
         return 'bg-red-50 border-red-200';
