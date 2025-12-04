@@ -22,11 +22,11 @@
 
 ### Problem: 복잡한 보안 규제와 수동 검증의 한계
 기존의 글로벌 위협 모델링 도구(예: OWASP Threat Dragon)는 한국의 **국가 망 보안 시설(N2SF)**이 요구하는 복잡한 **'망 분리'** 및 **'보안 등급(Class C/S/O)'** 규제를 검증하는 데 한계가 있었습니다.
-특히, 수십 개의 시스템이 얽힌 복잡한 망 구성도에서 관리자가 육안으로 보안 위반 사항을 검토하는 것은 **실수 가능성(Human Error)**이 매우 높으며, 막대한 시간과 비용이 소요되는 작업이었습니다.
+특히, 수십 개의 시스템이 얽힌 복잡한 망 구성도에서 관리자가 육안으로 보안 위반 사항을 검토하는 것은 실수 가능성(Human Error)이 매우 높으며, 막대한 시간과 비용이 소요되는 작업이었습니다.
 
 ### Solution: 정형 기법(Formal Methods)을 통한 100% 자동화 검증
 본 프로젝트는 수학적 증명 도구인 **Alloy Analyzer**를 핵심 엔진으로 탑재하여 이 문제를 해결했습니다.
-사용자가 직관적인 UI로 망 구성도를 그리기만 하면, 시스템이 백그라운드에서 논리적 모델로 변환하여 **규정 위반 여부를 전수 검사(Exhaustive Search)**합니다. 이를 통해 보안 전문가가 아니더라도 누구나 즉시 취약점을 식별하고 조치할 수 있는 **자동화된 보안 감사 시스템**을 구축했습니다.
+사용자가 직관적인 UI로 망 구성도를 그리기만 하면, 시스템이 백그라운드에서 논리적 모델로 변환하여 규정 위반 여부를 전수 검사(Exhaustive Search)합니다. 이를 통해 보안 전문가가 아니더라도 누구나 즉시 취약점을 식별하고 조치할 수 있는 **자동화된 보안 감사 시스템**을 구축했습니다.
 
 ## 2. 주요 기능 (Key Features)
 
@@ -34,7 +34,7 @@
 *   **Smart Modeling System**: Drag & Drop 인터페이스를 통해 노드를 배치하면, 좌표를 기반으로 **망(Zone) 소속을 자동으로 인식**하여 모델링 편의성을 극대화했습니다.
 *   **Formal Verification Engine**: 단순한 규칙 매칭이 아닌, Alloy의 SAT Solver를 활용하여 **다단계 연결(Multi-hop) 경로** 추적 및 논리적 모순을 검증합니다.
 *   **Auto Remediation Guide**: 위협이 탐지되면 단순한 경고에 그치지 않고, "어떤 설정을 변경해야 하는지"에 대한 **구체적인 해결 가이드(Actionable Guide)**를 제공합니다.
-*   **Real-time Security Dashboard**: **보안 건전성(Security Health)**과 **모델링 완성도**를 실시간으로 수치화하여 보여줌으로써, 사용자가 현재 보안 수준을 직관적으로 파악할 수 있습니다.
+*   **Real-time Security Dashboard**: **보안 건전성**과 **모델링 완성도**를 실시간으로 수치화하여 보여줌으로써, 사용자가 현재 보안 수준을 직관적으로 파악할 수 있습니다.
 
 ## 3. 데모 (Demo)
 
@@ -57,10 +57,10 @@
 
 ```mermaid
 graph LR
-    User[User] -->|Draw Diagram| Frontend[Frontend (React)]
-    Frontend -->|JSON Payload| Backend[Backend (Node.js)]
-    Backend -->|Generate .als| Alloy[Alloy Analyzer (Java)]
-    Alloy -->|SAT Solving| Result[Analysis Result (XML)]
+    User[User] -->|Draw Diagram| Frontend["Frontend (React)"]
+    Frontend -->|JSON Payload| Backend["Backend (Node.js)"]
+    Backend -->|Generate .als| Alloy["Alloy Analyzer (Java)"]
+    Alloy -->|SAT Solving| Result["Analysis Result (XML)"]
     Result -->|Parse & Map| Backend
     Backend -->|Threats & Guide| Frontend
     Frontend -->|Highlight & Dashboard| User
@@ -69,12 +69,12 @@ graph LR
 ## 5. 기술적 챌린지 (Technical Challenges & Solutions)
 
 ### Q: 왜 일반적인 코딩(JS/Python)이 아닌 Alloy를 사용했는가?
-**A:** 망 분리 환경에서는 A에서 B로 직접 연결되지 않더라도, C와 D를 거쳐 우회적으로 연결되는 **'추이적 관계(Transitive Closure)'**를 검증하는 것이 핵심입니다.
-일반적인 알고리즘(DFS/BFS)으로 모든 우회 경로와 보안 등급 간의 간섭을 검증하려면 코드가 기하급수적으로 복잡해집니다. 본 프로젝트는 **관계 논리(Relational Logic)**에 특화된 Alloy를 도입하여, 복잡한 우회 경로 탐지 문제를 간결하고 정확하게 해결했습니다.
+**A:** 망 분리 환경에서는 A에서 B로 직접 연결되지 않더라도, C와 D를 거쳐 우회적으로 연결되는 **'추이적 관계(Transitive Closure)**를 검증하는 것이 핵심입니다.
+일반적인 알고리즘(DFS/BFS)으로 모든 우회 경로와 보안 등급 간의 간섭을 검증하려면 코드가 기하급수적으로 복잡해집니다. 본 프로젝트는 **관계 논리**에 특화된 Alloy를 도입하여, 복잡한 우회 경로 탐지 문제를 간결하고 정확하게 해결했습니다.
 
 ### Q: 비전문가가 난해한 Alloy 코드를 어떻게 다루는가?
 **A:** 사용자는 Alloy를 전혀 알 필요가 없습니다. 사용자는 익숙한 GUI로 그림을 그리기만 하면 됩니다.
-백엔드에 구축된 **Deterministic Template Engine**이 사용자 모델을 Alloy 코드로 **트랜스파일링(Transpiling)**하고, 분석 결과를 다시 알기 쉬운 언어로 변환하여 제공하는 **추상화 레이어**를 완벽하게 구현했습니다.
+백엔드에 구축된 **Deterministic Template Engine**이 사용자 모델을 Alloy 코드로 트랜스파일링(Transpiling)하고, 분석 결과를 다시 알기 쉬운 언어로 변환하여 제공하는 **추상화 레이어**를 완벽하게 구현했습니다.
 
 ## 6. 설치 및 실행 (Getting Started)
 
