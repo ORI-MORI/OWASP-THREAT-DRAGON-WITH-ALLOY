@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useReactFlow } from 'reactflow';
-import { AlertTriangle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Shield } from 'lucide-react';
 import useStore from '../store';
 
 export default function PropertyPanel({ analysisResult, onThreatClick, selectedThreatId }) {
@@ -110,7 +110,13 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
     const renderPropertiesTab = () => {
         if (!selectedElement) {
             return (
-                <div className="text-gray-500 text-sm p-4">Select an element to edit properties.</div>
+                <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8 text-center">
+                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <p className="text-sm font-medium text-gray-600">No Selection</p>
+                    <p className="text-xs text-gray-400 mt-1">Select a node or edge to view properties.</p>
+                </div>
             );
         }
 
@@ -119,19 +125,23 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
         const isSystem = isNode && selectedElement.type === 'system';
         const isEdge = !!selectedElement.source;
 
+        const inputClass = "mt-1 block w-full rounded-lg border-gray-200/50 bg-white/50 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2 transition-all hover:bg-white/80";
+        const labelClass = "block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1";
+
         return (
-            <div className="flex flex-col gap-4">
-                <div className="text-xs text-gray-400">ID: {selectedElement.id}</div>
+            <div className="flex flex-col gap-5">
+                <div className="text-[10px] font-mono text-gray-400 bg-gray-50/50 p-1 rounded inline-block self-start">ID: {selectedElement.id}</div>
 
                 {/* Common Label/Name */}
                 {isNode && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Name</label>
+                        <label className={labelClass}>Name</label>
                         <input
                             type="text"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                            className={inputClass}
                             value={formData.label || ''}
                             onChange={(e) => handleChange('label', e.target.value)}
+                            placeholder="Enter name..."
                         />
                     </div>
                 )}
@@ -140,9 +150,9 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                 {isZone && (
                     <>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Grade</label>
+                            <label className={labelClass}>Grade</label>
                             <select
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                className={inputClass}
                                 value={formData.grade || 'Open'}
                                 onChange={(e) => handleChange('grade', e.target.value)}
                             >
@@ -152,9 +162,9 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Type</label>
+                            <label className={labelClass}>Type</label>
                             <select
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                className={inputClass}
                                 value={formData.type || 'Internet'}
                                 onChange={(e) => handleChange('type', e.target.value)}
                             >
@@ -173,9 +183,9 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                 {isSystem && (
                     <>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Location (Zone)</label>
+                            <label className={labelClass}>Location (Zone)</label>
                             <select
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                className={inputClass}
                                 value={formData.loc || ''}
                                 onChange={(e) => handleChange('loc', e.target.value)}
                             >
@@ -186,13 +196,13 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                     </option>
                                 ))}
                             </select>
-                            <p className="text-xs text-gray-500 mt-1">Override automatic placement.</p>
+                            <p className="text-[10px] text-gray-400 mt-1 italic">Override automatic placement.</p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Grade (Inherited if empty)</label>
+                            <label className={labelClass}>Grade (Inherited if empty)</label>
                             <select
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                className={inputClass}
                                 value={formData.grade || 'Open'}
                                 onChange={(e) => handleChange('grade', e.target.value)}
                             >
@@ -203,9 +213,9 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Type</label>
+                            <label className={labelClass}>Type</label>
                             <select
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                className={inputClass}
                                 value={formData.type || 'Server'}
                                 onChange={(e) => handleChange('type', e.target.value)}
                             >
@@ -220,9 +230,9 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Auth Type</label>
+                            <label className={labelClass}>Auth Type</label>
                             <select
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                className={inputClass}
                                 value={formData.authType || 'Single'}
                                 onChange={(e) => handleChange('authType', e.target.value)}
                             >
@@ -233,9 +243,9 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
 
                         {formData.type === 'Terminal' && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Isolation (VDI/RBI)</label>
+                                <label className={labelClass}>Isolation (VDI/RBI)</label>
                                 <select
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                    className={inputClass}
                                     value={formData.isolation || 'None'}
                                     onChange={(e) => handleChange('isolation', e.target.value)}
                                 >
@@ -246,67 +256,72 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                             </div>
                         )}
 
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="isCDS"
-                                checked={formData.isCDS || false}
-                                onChange={(e) => handleChange('isCDS', e.target.checked)}
-                            />
-                            <label htmlFor="isCDS" className="text-sm font-medium text-gray-700">Is CDS (Cross Domain)?</label>
-                        </div>
-
-
-
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="isRegistered"
-                                checked={formData.isRegistered || false}
-                                onChange={(e) => handleChange('isRegistered', e.target.checked)}
-                            />
-                            <label htmlFor="isRegistered" className="text-sm font-medium text-gray-700">Is Registered Device?</label>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="isStorageEncrypted"
-                                checked={formData.isStorageEncrypted || false}
-                                onChange={(e) => handleChange('isStorageEncrypted', e.target.checked)}
-                            />
-                            <label htmlFor="isStorageEncrypted" className="text-sm font-medium text-gray-700">Is Storage Encrypted?</label>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="isManagement"
-                                checked={formData.isManagement || false}
-                                onChange={(e) => handleChange('isManagement', e.target.checked)}
-                            />
-                            <label htmlFor="isManagement" className="text-sm font-medium text-gray-700">Is Management Device?</label>
-                        </div>
-
-                        {formData.type === 'Mobile' && (
-                            <div className="flex items-center gap-2">
+                        <div className="space-y-2 pt-2">
+                            <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/50 transition-colors">
                                 <input
                                     type="checkbox"
-                                    id="hasMDM"
-                                    checked={formData.hasMDM || false}
-                                    onChange={(e) => handleChange('hasMDM', e.target.checked)}
+                                    id="isCDS"
+                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={formData.isCDS || false}
+                                    onChange={(e) => handleChange('isCDS', e.target.checked)}
                                 />
-                                <label htmlFor="hasMDM" className="text-sm font-medium text-gray-700">Has MDM?</label>
+                                <label htmlFor="isCDS" className="text-sm font-medium text-gray-700 cursor-pointer">Is CDS (Cross Domain)?</label>
                             </div>
-                        )}
+
+                            <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/50 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    id="isRegistered"
+                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={formData.isRegistered || false}
+                                    onChange={(e) => handleChange('isRegistered', e.target.checked)}
+                                />
+                                <label htmlFor="isRegistered" className="text-sm font-medium text-gray-700 cursor-pointer">Is Registered Device?</label>
+                            </div>
+
+                            <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/50 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    id="isStorageEncrypted"
+                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={formData.isStorageEncrypted || false}
+                                    onChange={(e) => handleChange('isStorageEncrypted', e.target.checked)}
+                                />
+                                <label htmlFor="isStorageEncrypted" className="text-sm font-medium text-gray-700 cursor-pointer">Is Storage Encrypted?</label>
+                            </div>
+
+                            <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/50 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    id="isManagement"
+                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={formData.isManagement || false}
+                                    onChange={(e) => handleChange('isManagement', e.target.checked)}
+                                />
+                                <label htmlFor="isManagement" className="text-sm font-medium text-gray-700 cursor-pointer">Is Management Device?</label>
+                            </div>
+
+                            {formData.type === 'Mobile' && (
+                                <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/50 transition-colors">
+                                    <input
+                                        type="checkbox"
+                                        id="hasMDM"
+                                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                        checked={formData.hasMDM || false}
+                                        onChange={(e) => handleChange('hasMDM', e.target.checked)}
+                                    />
+                                    <label htmlFor="hasMDM" className="text-sm font-medium text-gray-700 cursor-pointer">Has MDM?</label>
+                                </div>
+                            )}
+                        </div>
 
                         {/* Data Assets Management */}
-                        <div className="border-t border-gray-200 pt-4 mt-4">
-                            <div className="flex justify-between items-center mb-2">
-                                <label className="block text-sm font-medium text-gray-700">Stored Data Assets</label>
+                        <div className="border-t border-gray-200/50 pt-4 mt-2">
+                            <div className="flex justify-between items-center mb-3">
+                                <label className={labelClass}>Stored Data Assets</label>
                                 <button
                                     onClick={addData}
-                                    className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100"
+                                    className="text-xs bg-indigo-50 text-indigo-600 px-2 py-1.5 rounded-md hover:bg-indigo-100 font-medium transition-colors"
                                 >
                                     + Add Data
                                 </button>
@@ -314,21 +329,21 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
 
                             <div className="space-y-3">
                                 {(formData.storedData || []).map((data) => (
-                                    <div key={data.id} className="bg-gray-50 p-2 rounded border border-gray-200 text-xs">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="font-bold text-gray-500">Data #{data.id}</span>
+                                    <div key={data.id} className="bg-white/60 p-3 rounded-lg border border-gray-200/50 text-xs shadow-sm">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="font-bold text-indigo-900">Data #{data.id}</span>
                                             <button
                                                 onClick={() => removeData(data.id)}
-                                                className="text-red-500 hover:text-red-700"
+                                                className="text-red-500 hover:text-red-700 font-medium"
                                             >
                                                 Remove
                                             </button>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
-                                                <label className="block text-[10px] text-gray-500">Grade</label>
+                                                <label className="block text-[10px] text-gray-500 mb-1">Grade</label>
                                                 <select
-                                                    className="w-full border-gray-300 rounded text-xs p-1"
+                                                    className="w-full border-gray-200/50 bg-white rounded text-xs p-1.5 focus:ring-indigo-500 focus:border-indigo-500"
                                                     value={data.grade}
                                                     onChange={(e) => updateData(data.id, 'grade', e.target.value)}
                                                 >
@@ -338,9 +353,9 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                                 </select>
                                             </div>
                                             <div>
-                                                <label className="block text-[10px] text-gray-500">Type</label>
+                                                <label className="block text-[10px] text-gray-500 mb-1">Type</label>
                                                 <select
-                                                    className="w-full border-gray-300 rounded text-xs p-1"
+                                                    className="w-full border-gray-200/50 bg-white rounded text-xs p-1.5 focus:ring-indigo-500 focus:border-indigo-500"
                                                     value={data.fileType}
                                                     onChange={(e) => updateData(data.id, 'fileType', e.target.value)}
                                                 >
@@ -353,12 +368,12 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                     </div>
                                 ))}
                                 {(formData.storedData || []).length === 0 && (
-                                    <p className="text-xs text-gray-400 italic text-center py-2">No data stored.</p>
+                                    <div className="text-xs text-gray-400 italic text-center py-4 border border-dashed border-gray-200 rounded-lg">
+                                        No data stored.
+                                    </div>
                                 )}
                             </div>
                         </div>
-
-
                     </>
                 )}
 
@@ -366,9 +381,9 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                 {isEdge && (
                     <>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Protocol</label>
+                            <label className={labelClass}>Protocol</label>
                             <select
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                className={inputClass}
                                 value={formData.protocol || 'HTTPS'}
                                 onChange={(e) => handleChange('protocol', e.target.value)}
                             >
@@ -381,22 +396,19 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                         </div>
 
                         {(() => {
-                            // Helper to get current source/target nodes
-                            // We need to look up the nodes to get their labels
                             const sourceNode = getNodes().find(n => n.id === selectedElement.source);
                             const targetNode = getNodes().find(n => n.id === selectedElement.target);
                             const sourceLabel = sourceNode?.data?.label || sourceNode?.id || 'Source';
                             const targetLabel = targetNode?.data?.label || targetNode?.id || 'Target';
 
                             return (
-                                <div className="flex flex-col gap-3 border-t border-gray-200 pt-3 mt-3">
-                                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Connection Settings</h4>
+                                <div className="flex flex-col gap-3 border-t border-gray-200/50 pt-4 mt-2">
+                                    <h4 className={labelClass}>Connection Settings</h4>
 
-                                    {/* Flow Type Selection */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Flow Type</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Flow Type</label>
                                         <select
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                            className={inputClass}
                                             value={formData.isBidirectional !== false ? 'bidirectional' : 'unidirectional'}
                                             onChange={(e) => handleChange('isBidirectional', e.target.value === 'bidirectional')}
                                         >
@@ -405,41 +417,34 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                         </select>
                                     </div>
 
-                                    {/* Direction Selection (Only for Unidirectional) */}
-                                    {/* Direction Control (Only for Unidirectional) */}
                                     {formData.isBidirectional === false && (
                                         <div className="mt-2">
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Direction</label>
-                                            <div className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
+                                            <div className="flex items-center justify-between p-2 bg-white/50 rounded-lg border border-gray-200/50">
                                                 <span className="text-xs text-gray-600 font-medium truncate max-w-[150px]" title={`${sourceLabel} → ${targetLabel}`}>
                                                     {sourceLabel} → {targetLabel}
                                                 </span>
                                                 <button
                                                     onClick={() => {
-                                                        // Perform Swap by creating a NEW edge to force re-render
                                                         const oldEdge = getEdges().find(e => e.id === selectedElement.id);
                                                         if (oldEdge) {
-                                                            // Helper to map handles for the new direction
-                                                            // We need to find a valid SOURCE handle on the OLD TARGET node (which becomes NEW SOURCE)
-                                                            // And a valid TARGET handle on the OLD SOURCE node (which becomes NEW TARGET)
-
                                                             const mapToSourceHandle = (handleId) => {
                                                                 if (!handleId) return 'right-source';
                                                                 if (handleId.includes('-target')) return handleId.replace('-target', '-source');
-                                                                if (handleId.includes('-source')) return handleId; // Already source? Should not happen for a target handle but safe to keep
-                                                                return `${handleId}-source`; // Legacy fallback
+                                                                if (handleId.includes('-source')) return handleId;
+                                                                return `${handleId}-source`;
                                                             };
 
                                                             const mapToTargetHandle = (handleId) => {
                                                                 if (!handleId) return 'left-target';
                                                                 if (handleId.includes('-source')) return handleId.replace('-source', '-target');
                                                                 if (handleId.includes('-target')) return handleId;
-                                                                return `${handleId}-target`; // Legacy fallback
+                                                                return `${handleId}-target`;
                                                             };
 
                                                             const newEdge = {
                                                                 ...oldEdge,
-                                                                id: `e-${Date.now()}`, // Generate new ID
+                                                                id: `e-${Date.now()}`,
                                                                 source: oldEdge.target,
                                                                 target: oldEdge.source,
                                                                 sourceHandle: mapToSourceHandle(oldEdge.targetHandle),
@@ -451,7 +456,7 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                                             setSelectedElement(newEdge);
                                                         }
                                                     }}
-                                                    className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-100 shadow-sm flex items-center gap-1 transition-colors"
+                                                    className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50 shadow-sm flex items-center gap-1 transition-colors"
                                                     title="Reverse Direction"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
@@ -467,91 +472,59 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                             );
                         })()}
 
-                        {/* {!formData.isBidirectional && (
-                            <button
-                                onClick={() => {
-                                    // Swap source and target
-                                    const edge = getNodes().find(n => n.id === selectedElement.id) || selectedElement; // selectedElement is the edge
-                                    // Actually, selectedElement IS the edge object with source/target props
-                                    // But we need to update the edge in the React Flow state.
-                                    // The 'handleChange' only updates 'data'. We need a specific handler for swapping.
+                        <div className="space-y-2 pt-2">
+                            <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/50 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    id="isEncrypted"
+                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={formData.isEncrypted || false}
+                                    onChange={(e) => handleChange('isEncrypted', e.target.checked)}
+                                />
+                                <label htmlFor="isEncrypted" className="text-sm font-medium text-gray-700 cursor-pointer">Is Encrypted?</label>
+                            </div>
 
-                                    // Since we can't easily swap source/target IDs of an existing edge without re-creating it,
-                                    // and PropertyPanel only has access to setEdges via props or context.
-                                    // We have setEdges from useReactFlow().
+                            <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/50 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    id="hasCDR"
+                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={formData.hasCDR || false}
+                                    onChange={(e) => handleChange('hasCDR', e.target.checked)}
+                                />
+                                <label htmlFor="hasCDR" className="text-sm font-medium text-gray-700 cursor-pointer">Has CDR?</label>
+                            </div>
 
-                                    setEdges((eds) => eds.map(e => {
-                                        if (e.id === selectedElement.id) {
-                                            return {
-                                                ...e,
-                                                source: e.target,
-                                                target: e.source,
-                                                sourceHandle: e.targetHandle, // Simplistic swap, might need refinement if handles are specific
-                                                targetHandle: e.sourceHandle
-                                            };
-                                        }
-                                        return e;
-                                    }));
+                            <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/50 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    id="hasDLP"
+                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={formData.hasDLP || false}
+                                    onChange={(e) => handleChange('hasDLP', e.target.checked)}
+                                />
+                                <label htmlFor="hasDLP" className="text-sm font-medium text-gray-700 cursor-pointer">Has DLP?</label>
+                            </div>
 
-                                    // We also need to update selectedElement to reflect the change immediately if needed,
-                                    // but since the ID stays the same, it might just work.
-                                    // However, React Flow might re-render the edge.
-                                }}
-                                className="w-full py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 flex items-center justify-center gap-1"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
-                                Swap Direction
-                            </button>
-                        )} */ }
-
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="isEncrypted"
-                                checked={formData.isEncrypted || false}
-                                onChange={(e) => handleChange('isEncrypted', e.target.checked)}
-                            />
-                            <label htmlFor="isEncrypted" className="text-sm font-medium text-gray-700">Is Encrypted?</label>
+                            <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/50 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    id="hasAntiVirus"
+                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={formData.hasAntiVirus || false}
+                                    onChange={(e) => handleChange('hasAntiVirus', e.target.checked)}
+                                />
+                                <label htmlFor="hasAntiVirus" className="text-sm font-medium text-gray-700 cursor-pointer">Has Anti-Virus?</label>
+                            </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="hasCDR"
-                                checked={formData.hasCDR || false}
-                                onChange={(e) => handleChange('hasCDR', e.target.checked)}
-                            />
-                            <label htmlFor="hasCDR" className="text-sm font-medium text-gray-700">Has CDR?</label>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="hasDLP"
-                                checked={formData.hasDLP || false}
-                                onChange={(e) => handleChange('hasDLP', e.target.checked)}
-                            />
-                            <label htmlFor="hasDLP" className="text-sm font-medium text-gray-700">Has DLP?</label>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="hasAntiVirus"
-                                checked={formData.hasAntiVirus || false}
-                                onChange={(e) => handleChange('hasAntiVirus', e.target.checked)}
-                            />
-                            <label htmlFor="hasAntiVirus" className="text-sm font-medium text-gray-700">Has Anti-Virus?</label>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Carries Data</label>
+                        <div className="pt-4 mt-2 border-t border-gray-200/50">
+                            <label className={labelClass}>Carries Data</label>
 
                             {(() => {
                                 const sourceNode = getNodes().find(n => n.id === selectedElement.source);
                                 const availableData = sourceNode?.data?.storedData || [];
 
-                                // Parse current carries data
                                 const currentCarries = (formData.carries || '')
                                     .toString()
                                     .split(',')
@@ -578,7 +551,7 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
 
                                 if (availableData.length === 0) {
                                     return (
-                                        <div className="text-xs text-gray-500 italic bg-gray-50 p-2 rounded border border-gray-200">
+                                        <div className="text-xs text-gray-500 italic bg-gray-50/50 p-3 rounded-lg border border-dashed border-gray-300 text-center">
                                             No data available in source node.
                                             <br />Add "Stored Data" to the source node first.
                                         </div>
@@ -590,7 +563,7 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                         {currentCarries.map((dataId, idx) => (
                                             <div key={idx} className="flex gap-2 items-center">
                                                 <select
-                                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-1"
+                                                    className="block w-full rounded-md border-gray-200/50 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-1.5"
                                                     value={dataId}
                                                     onChange={(e) => handleUpdateData(idx, e.target.value)}
                                                 >
@@ -602,7 +575,7 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                                 </select>
                                                 <button
                                                     onClick={() => handleRemoveData(idx)}
-                                                    className="text-red-500 hover:text-red-700 p-1"
+                                                    className="text-red-500 hover:text-red-700 p-1.5 rounded hover:bg-red-50"
                                                     title="Remove"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -612,7 +585,7 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
 
                                         <button
                                             onClick={handleAddData}
-                                            className="w-full py-1 text-xs border border-dashed border-blue-300 text-blue-600 rounded hover:bg-blue-50 transition-colors flex items-center justify-center gap-1"
+                                            className="w-full py-2 text-xs border border-dashed border-indigo-300 text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors flex items-center justify-center gap-1 font-medium"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                                             Add Data Flow
@@ -625,11 +598,12 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                 )}
 
                 {/* Delete Button */}
-                <div className="border-t border-gray-200 pt-4 mt-4">
+                <div className="border-t border-gray-200/50 pt-4 mt-4 pb-4">
                     <button
                         onClick={handleDelete}
-                        className="w-full bg-red-50 text-red-600 border border-red-200 py-2 rounded hover:bg-red-100 transition-colors text-sm font-medium"
+                        className="w-full bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium flex items-center justify-center gap-2"
                     >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         Delete {isEdge ? 'Connection' : 'Element'}
                     </button>
                 </div>
@@ -640,9 +614,12 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
     const renderThreatsTab = () => {
         if (!analysisResult) {
             return (
-                <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4">
-                    <p className="text-sm">No analysis performed yet.</p>
-                    <p className="text-xs">Click "Analyze" to check for threats.</p>
+                <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4 text-center">
+                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                        <Shield size={24} className="text-gray-400" />
+                    </div>
+                    <p className="text-sm font-medium">No analysis performed yet.</p>
+                    <p className="text-xs mt-1">Click "Analyze" to check for threats.</p>
                 </div>
             );
         }
@@ -652,25 +629,27 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
 
         if (!hasViolations) {
             return (
-                <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4">
-                    <CheckCircle size={48} className="text-green-500 mb-2" />
-                    <p className="text-lg font-medium text-green-700">Secure</p>
-                    <p className="text-sm text-center">No security violations found.</p>
+                <div className="flex flex-col items-center justify-center h-full text-gray-500 p-4 text-center">
+                    <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-4">
+                        <CheckCircle size={32} className="text-green-500" />
+                    </div>
+                    <p className="text-lg font-bold text-green-700">Secure</p>
+                    <p className="text-sm text-gray-500 mt-1">No security violations found.</p>
                 </div>
             );
         }
 
         return (
             <div className="space-y-4 p-1">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-2 bg-red-50 p-3 rounded-lg border border-red-100">
                     <AlertTriangle className="text-red-600" size={20} />
                     <span className="font-bold text-red-700">{total_count} Violations Found</span>
                 </div>
                 {Object.entries(threats).map(([key, items]) => {
                     if (items.length === 0) return null;
                     return (
-                        <div key={key} className="border border-red-100 rounded-lg overflow-hidden">
-                            <div className="bg-red-50 px-3 py-2 border-b border-red-100 flex items-center gap-2">
+                        <div key={key} className="border border-red-100 rounded-xl overflow-hidden bg-white shadow-sm">
+                            <div className="bg-red-50/50 px-3 py-2 border-b border-red-100 flex items-center gap-2">
                                 <div className="w-2 h-2 rounded-full bg-red-500"></div>
                                 <h4 className="font-semibold text-red-900 text-xs uppercase tracking-wide">
                                     {key.replace(/([A-Z])/g, ' $1').trim()}
@@ -684,9 +663,9 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                     return (
                                         <div
                                             key={idx}
-                                            className={`p-2 transition-all duration-200 ease-in-out cursor-pointer active:scale-95 hover:shadow-sm border rounded-md m-1 ${isSelected
-                                                ? 'bg-blue-50 border-blue-300 shadow-md'
-                                                : 'hover:bg-red-50 border-transparent hover:border-red-200'
+                                            className={`p-3 transition-all duration-200 ease-in-out cursor-pointer active:scale-95 hover:bg-red-50/30 ${isSelected
+                                                ? 'bg-blue-50 border-l-4 border-blue-500'
+                                                : 'border-l-4 border-transparent'
                                                 }`}
                                             onClick={() => onThreatClick && onThreatClick(item, key, idx)}
                                         >
@@ -694,15 +673,15 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                                 <span className="font-semibold text-gray-700 text-xs">Violation #{idx + 1}</span>
                                                 {isSelected && (
                                                     <span className="text-blue-600 font-bold text-[10px] bg-blue-100 px-1.5 py-0.5 rounded-full">
-                                                        선택됨
+                                                        Selected
                                                     </span>
                                                 )}
                                             </div>
-                                            <ul className="space-y-1">
+                                            <ul className="space-y-1 mt-2">
                                                 {Object.entries(item).map(([k, v]) => (
-                                                    <li key={k} className="flex flex-col">
-                                                        <span className="font-medium text-gray-900">{k}:</span>
-                                                        <span className="text-gray-600 break-all pl-2">{v}</span>
+                                                    <li key={k} className="flex flex-col text-xs">
+                                                        <span className="font-medium text-gray-500 uppercase tracking-wider text-[10px]">{k}</span>
+                                                        <span className="text-gray-800 break-all">{v}</span>
                                                     </li>
                                                 ))}
                                             </ul>
@@ -718,17 +697,17 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
     };
 
     return (
-        <div className="w-80 bg-white border-l border-gray-200 flex flex-col h-full">
+        <div className="absolute right-4 top-4 bottom-4 w-80 glass-panel rounded-xl flex flex-col transition-all duration-300 z-20">
             {/* Tabs */}
-            <div className="flex border-b border-gray-200">
+            <div className="flex border-b border-gray-200/50">
                 <button
-                    className={`flex-1 py-3 text-sm font-medium ${activeTab === 'properties' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'properties' ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/30' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50/50'}`}
                     onClick={() => setActiveTab('properties')}
                 >
                     Properties
                 </button>
                 <button
-                    className={`flex-1 py-3 text-sm font-medium ${activeTab === 'threats' ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'threats' ? 'text-red-600 border-b-2 border-red-600 bg-red-50/30' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50/50'}`}
                     onClick={() => setActiveTab('threats')}
                 >
                     Threats
@@ -741,7 +720,7 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                 {activeTab === 'properties' ? renderPropertiesTab() : renderThreatsTab()}
             </div>
         </div>

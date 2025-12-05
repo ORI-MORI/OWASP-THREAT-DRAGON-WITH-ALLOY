@@ -101,16 +101,16 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
         <div className="absolute top-4 left-4 z-20 flex flex-col gap-3">
             {/* Security Score Card */}
             <div
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg shadow-md border transition-all duration-200 cursor-help ${getScoreBg(displayedSecurityScore)}`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 cursor-help glass-panel hover:shadow-lg ${getScoreBg(displayedSecurityScore)}`}
                 onMouseEnter={() => setHoveredMetric('security')}
                 onMouseLeave={() => setHoveredMetric(null)}
             >
-                <div className={`p-1.5 rounded-full bg-white shadow-sm ${getScoreColor(displayedSecurityScore)}`}>
-                    <Shield size={18} strokeWidth={2.5} className={isAnalyzing ? 'animate-pulse' : ''} />
+                <div className={`p-2 rounded-full bg-white/90 shadow-sm ${getScoreColor(displayedSecurityScore)}`}>
+                    <Shield size={20} strokeWidth={2.5} className={isAnalyzing ? 'animate-pulse' : ''} />
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">보안 건전성</span>
-                    <span className={`text-xl font-extrabold leading-none ${getScoreColor(displayedSecurityScore)}`}>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">보안 건전성</span>
+                    <span className={`text-2xl font-black leading-none ${getScoreColor(displayedSecurityScore)}`}>
                         {isAnalyzing ? (
                             <span className="text-lg animate-pulse">분석중...</span>
                         ) : displayedSecurityScore === null ? (
@@ -123,9 +123,9 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
 
                 {/* Tooltip */}
                 {hoveredMetric === 'security' && (
-                    <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-gray-800 text-white text-xs rounded shadow-xl z-50 pointer-events-none animate-in fade-in slide-in-from-top-1">
-                        <div className="font-bold mb-1 text-sm flex items-center gap-2">
-                            <Shield size={14} /> 보안 건전성 (Security Health)
+                    <div className="absolute left-0 top-full mt-2 w-72 p-4 glass-panel bg-gray-900/95 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none animate-in fade-in slide-in-from-top-2 backdrop-blur-xl border-gray-700/50">
+                        <div className="font-bold mb-2 text-sm flex items-center gap-2 text-indigo-300">
+                            <Shield size={16} /> 보안 건전성 (Security Health)
                         </div>
                         <p className="leading-relaxed text-gray-300">
                             망 구성의 보안 안전성을 퍼센트로 나타냅니다.
@@ -142,25 +142,25 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
 
             {/* Completeness Card */}
             <div
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg shadow-md border transition-all duration-200 cursor-help ${getCompletenessBg(completenessData.ratio)}`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 cursor-help glass-panel hover:shadow-lg ${getCompletenessBg(completenessData.ratio)}`}
                 onMouseEnter={() => setHoveredMetric('completeness')}
                 onMouseLeave={() => setHoveredMetric(null)}
             >
-                <div className={`p-1.5 rounded-full bg-white shadow-sm ${getCompletenessColor(completenessData.ratio)}`}>
-                    <CheckCircle size={18} strokeWidth={2.5} />
+                <div className={`p-2 rounded-full bg-white/90 shadow-sm ${getCompletenessColor(completenessData.ratio)}`}>
+                    <CheckCircle size={20} strokeWidth={2.5} />
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">모델링 완성도</span>
-                    <span className={`text-xl font-extrabold leading-none ${getCompletenessColor(completenessData.ratio)}`}>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">모델링 완성도</span>
+                    <span className={`text-2xl font-black leading-none ${getCompletenessColor(completenessData.ratio)}`}>
                         {completenessData.text}
                     </span>
                 </div>
 
                 {/* Tooltip */}
                 {hoveredMetric === 'completeness' && (
-                    <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-gray-800 text-white text-xs rounded shadow-xl z-50 pointer-events-none animate-in fade-in slide-in-from-top-1">
-                        <div className="font-bold mb-1 text-sm flex items-center gap-2">
-                            <CheckCircle size={14} /> 모델링 완성도 (Completeness)
+                    <div className="absolute left-0 top-full mt-2 w-72 p-4 glass-panel bg-gray-900/95 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none animate-in fade-in slide-in-from-top-2 backdrop-blur-xl border-gray-700/50">
+                        <div className="font-bold mb-2 text-sm flex items-center gap-2 text-emerald-300">
+                            <CheckCircle size={16} /> 모델링 완성도 (Completeness)
                         </div>
                         <p className="leading-relaxed text-gray-300">
                             전체 노드 중 연결된 노드의 비율을 나타냅니다.

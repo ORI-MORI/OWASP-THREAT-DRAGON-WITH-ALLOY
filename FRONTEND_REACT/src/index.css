@@ -1,8 +1,38 @@
 @import "tailwindcss";
 
+:root {
+  /* Brand Colors */
+  --color-brand-primary: #6366f1;
+  /* Indigo 500 */
+  --color-brand-secondary: #4f46e5;
+  /* Indigo 600 */
+  --color-brand-accent: #818cf8;
+  /* Indigo 400 */
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  --glass-blur: blur(12px);
+}
+
 html,
 body,
 #root {
   height: 100%;
   margin: 0;
+  background-color: #f8fafc;
+  /* Slate 50 */
+  color: #1e293b;
+  /* Slate 800 */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Utility Class for Glass Effect */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
