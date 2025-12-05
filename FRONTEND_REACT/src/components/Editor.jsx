@@ -89,6 +89,10 @@ const EditorContent = () => {
                 if (label === 'PC') defaultType = 'Terminal';
                 else if (label === 'Gateway') defaultType = 'NetworkDevice';
                 else if (label === 'Server') defaultType = 'Server';
+                else if (label === 'Mobile') defaultType = 'Mobile';
+                else if (label === 'Security Device') defaultType = 'SecurityDevice';
+                else if (label === 'Wireless AP') defaultType = 'WirelessAP';
+                else if (label === 'SaaS') defaultType = 'SaaS';
                 else defaultType = 'Terminal';
             }
 
@@ -398,7 +402,11 @@ const EditorContent = () => {
                     fitView
                     proOptions={{ hideAttribution: true }}
                 >
-                    <Controls className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm rounded-lg m-4 text-gray-600" />
+                    <Controls
+                        position="bottom-right"
+                        style={{ marginRight: '340px', marginBottom: '16px' }}
+                        className="bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm rounded-lg text-gray-600"
+                    />
                     <Background variant="dots" gap={20} size={1} color="#cbd5e1" />
                 </ReactFlow>
             </div>
@@ -419,8 +427,8 @@ const EditorContent = () => {
                     onClick={handleAnalyze}
                     disabled={isAnalyzing}
                     className={`px-6 py-2 rounded-lg text-sm font-bold shadow-sm flex items-center gap-2 transition-all ${isAnalyzing
-                            ? 'bg-indigo-100 text-indigo-400 cursor-not-allowed'
-                            : 'bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-indigo-200'
+                        ? 'bg-indigo-100 text-indigo-400 cursor-not-allowed'
+                        : 'bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-indigo-200'
                         }`}
                 >
                     {isAnalyzing ? (
