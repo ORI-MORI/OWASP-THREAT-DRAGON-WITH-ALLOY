@@ -52,7 +52,18 @@ function executeAlloy(filePath) {
                 if (fs.existsSync(xmlPath)) {
                     const xmlContent = fs.readFileSync(xmlPath, 'utf8');
                     const violations = parseAlloyXML(xmlContent);
-                    resolve({ success: true, result: violations });
+
+                    // Log final result to file
+                    const result = violations; // parseAlloyXML returns { threats, total_count }
+
+                    try {
+                        fs.writeFileSync('debug_result.json', JSON.stringify(result, null, 2));
+                        console.log("Final Result Saved to debug_result.json");
+                    } catch (e) {
+                        console.error("Failed to write debug_result.json", e);
+                    }
+
+                    resolve({ success: true, result });
                 } else {
                     resolve({ success: false, error: "XML output not found" });
                 }
@@ -74,10 +85,10 @@ function parseAlloyXML(xml) {
         lastPart = lastPart.split('$')[0];
 
         // Strip prefixes added by alloyGenerator.js
-        if (lastPart.startsWith('System')) return lastPart.substring(6);
-        if (lastPart.startsWith('Location')) return lastPart.substring(8);
-        if (lastPart.startsWith('Connection')) return lastPart.substring(10);
-        if (lastPart.startsWith('Data')) return lastPart.substring(4);
+        if (lastPart.startsWith('System') && lastPart.length > 6) return lastPart.substring(6);
+        if (lastPart.startsWith('Location') && lastPart.length > 8) return lastPart.substring(8);
+        if (lastPart.startsWith('Connection') && lastPart.length > 10) return lastPart.substring(10);
+        if (lastPart.startsWith('Data') && lastPart.length > 4) return lastPart.substring(4);
 
         return lastPart;
     };

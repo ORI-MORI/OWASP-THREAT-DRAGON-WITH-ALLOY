@@ -11,7 +11,7 @@ import ReactFlow, {
     MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Play } from 'lucide-react';
+import { Play, Home as HomeIcon, Save as SaveIcon, Trash as TrashIcon } from 'lucide-react';
 
 import Sidebar from './Sidebar';
 import ZoneNode from './ZoneNode';
@@ -245,48 +245,104 @@ const EditorContent = ({ initialData, onExit }) => {
     };
 
     const handleThreatClick = (threatId) => {
-        setSelectedThreatId(threatId);
+        setSelectedThreatId(prev => prev === threatId ? null : threatId);
     };
 
     // Effect to highlight nodes/edges when a threat is selected
     useEffect(() => {
+        // Helper update function to avoid infinite loops
+        const updateElements = (elements, shouldBeThreatFn) => {
+            let hasChanges = false;
+            const newElements = elements.map(el => {
+                const isThreat = shouldBeThreatFn(el);
+                if (!!el.data.isThreat !== isThreat) {
+                    hasChanges = true;
+                    return { ...el, data: { ...el.data, isThreat } };
+                }
+                return el;
+            });
+            return hasChanges ? newElements : elements;
+        };
+
         if (!analysisResult || !selectedThreatId) {
-            // Clear highlights
-            setNodes((nds) => nds.map(n => ({ ...n, data: { ...n.data, isThreat: false } })));
-            setEdges((eds) => eds.map(e => ({ ...e, data: { ...e.data, isThreat: false } })));
+            // Clear highlights safely
+            setNodes(nds => updateElements(nds, () => false));
+            setEdges(eds => updateElements(eds, () => false));
             return;
         }
 
-        // Parse threatId "FindStorageViolations-0"
-        const [threatType, indexStr] = selectedThreatId.split('-');
-        const index = parseInt(indexStr);
-        const threat = analysisResult.threats[threatType][index];
+        // Helper to sanitize ID consistent with graphConverter
+        const sanitizeId = (id) => id.toString().replace(/[^a-zA-Z0-9]/g, '_');
 
-        if (!threat) return;
+        const isMatch = (elementId, involveSet) => {
+            if (!elementId) return false;
 
-        // Identify involved IDs
+            // 0. Absolute Exact Match (Fast path)
+            if (involveSet.has(elementId)) return true;
+
+            const cleanId = sanitizeId(elementId);
+
+            // 1. Exact match of sanitized ID
+            if (involveSet.has(cleanId)) return true;
+
+            // 2. Match with _return suffix
+            if (involveSet.has(cleanId + '_return')) return true;
+
+            // 3. Reverse lookup and Prefix/Suffix matching
+            for (const rawThreatId of involveSet) {
+                // Strip Alloy Skolem suffixes (e.g., $0)
+                let threatId = rawThreatId.split('$')[0].trim();
+
+                if (threatId === elementId) return true;
+                if (threatId === cleanId) return true;
+                if (threatId.endsWith('_' + cleanId)) return true;
+                if (cleanId.endsWith('_' + threatId)) return true;
+
+                // Handle potential path prefixes like "System/dndnode_1"
+                if (threatId.includes('/')) {
+                    const pathPart = threatId.split('/').pop();
+                    if (pathPart === cleanId) return true;
+                }
+            }
+            return false;
+        };
+
+        // Parse threatId safely handling hyphens in the key
+        const lastDashIndex = selectedThreatId.lastIndexOf('-');
+        const threatType = selectedThreatId.substring(0, lastDashIndex);
+        const indicesStr = selectedThreatId.substring(lastDashIndex + 1);
+
+        const indices = indicesStr.split(',').map(idx => parseInt(idx, 10));
+
         const involvedIds = new Set();
-        if (threat.system) involvedIds.add(threat.system);
-        if (threat.connection) involvedIds.add(threat.connection);
-        // Data is not a node/edge, so we ignore threat.data for highlighting
+        indices.forEach(index => {
+            if (!analysisResult.threats || !analysisResult.threats[threatType]) return;
+            const threat = analysisResult.threats[threatType][index];
+            if (!threat) return;
+
+            if (threat.system) involvedIds.add(threat.system);
+            if (threat.connection) involvedIds.add(threat.connection);
+        });
+
+        // INFERENCE STEP
+        edges.forEach(e => {
+            if (isMatch(e.id, involvedIds)) {
+                involvedIds.add(e.source);
+                involvedIds.add(e.target);
+            }
+        });
 
         // Update Nodes
-        setNodes((nds) => nds.map(n => {
-            // Check if node ID matches (Alloy IDs are sanitized, so we compare loosely or exactly if possible)
-            // The backend returns IDs like "node_internet_pc" (stripped of System prefix)
-            // Our nodes have IDs like "node_internet_pc" (if loaded from preset) or "dndnode_..."
-            // graphConverter sanitizes them. We should assume exact match or sanitized match.
-            const isInvolved = involvedIds.has(n.id) || involvedIds.has(n.id.replace(/[^a-zA-Z0-9]/g, '_'));
-            return { ...n, data: { ...n.data, isThreat: isInvolved } };
+        setNodes((nds) => updateElements(nds, (n) => {
+            return isMatch(n.id, involvedIds) || (n.data.label && isMatch(n.data.label, involvedIds));
         }));
 
         // Update Edges
-        setEdges((eds) => eds.map(e => {
-            const isInvolved = involvedIds.has(e.id) || involvedIds.has(e.id.replace(/[^a-zA-Z0-9]/g, '_'));
-            return { ...e, data: { ...e.data, isThreat: isInvolved } };
+        setEdges((eds) => updateElements(eds, (e) => {
+            return isMatch(e.id, involvedIds);
         }));
 
-    }, [selectedThreatId, analysisResult, setNodes, setEdges]);
+    }, [selectedThreatId, analysisResult, setNodes, setEdges, edges]);
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-slate-50">
@@ -327,7 +383,7 @@ const EditorContent = ({ initialData, onExit }) => {
                     className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors flex items-center gap-2"
                     title="Back to Home"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <HomeIcon size={16} />
                     Home
                 </button>
                 <div className="w-px bg-gray-200/50 my-1"></div>
@@ -336,7 +392,7 @@ const EditorContent = ({ initialData, onExit }) => {
                     className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-2"
                     title="Save Project"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    <SaveIcon size={16} />
                     Save
                 </button>
                 <div className="w-px bg-gray-200/50 my-1"></div>
@@ -344,7 +400,7 @@ const EditorContent = ({ initialData, onExit }) => {
                     onClick={handleClearAll}
                     className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <TrashIcon size={16} />
                     Clear
                 </button>
                 <div className="w-px bg-gray-200/50 my-1"></div>

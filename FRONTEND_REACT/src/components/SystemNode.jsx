@@ -46,7 +46,7 @@ const SystemNode = ({ data, selected }) => {
 
             {/* Main Card */}
             <div className={`relative min-w-[120px] p-3 rounded-xl glass-panel flex flex-col items-center gap-2 transition-all duration-300 
-                ${data.isThreat ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]' :
+                ${data.isThreat ? 'border-2 !border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.8)] z-50' :
                     selected ? 'border-indigo-500/50 shadow-indigo-500/20' : 'border-white/40 hover:border-white/60'}`}>
 
                 {/* Icon Circle */}

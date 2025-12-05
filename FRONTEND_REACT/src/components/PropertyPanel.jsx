@@ -624,7 +624,11 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
             );
         }
 
-        const { total_count, threats } = analysisResult;
+        const threats = analysisResult.threats || {};
+        const total_count = analysisResult.total_count !== undefined
+            ? analysisResult.total_count
+            : Object.values(threats).reduce((acc, items) => acc + items.length, 0);
+
         const hasViolations = total_count > 0;
 
         if (!hasViolations) {
@@ -639,14 +643,117 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
             );
         }
 
+        // --- Helper to merge bidirectional threats ---
+        const getMergedThreats = (violationType, items) => {
+            const merged = [];
+            const processedIndices = new Set();
+
+            items.forEach((item, index) => {
+                if (processedIndices.has(index)) return;
+
+                // Find potential duplicate (same system, same data, similar connection)
+                // Note: Connections might have different IDs like "flow_a_b" and "flow_b_a"
+                // But usually for bidirectional they share other properties.
+                // A better heuristic is: if everything except the connection ID is the same,
+                // AND the connection IDs look like reverse of each other or we know they are pair.
+                // For simplicity, let's group by "System + Data" for now, as that's usually the unique pair for a threat type.
+                // Or "Source + Target + Data".
+
+                // Let's look ahead for a match
+                let matchIndex = -1;
+                for (let i = index + 1; i < items.length; i++) {
+                    if (processedIndices.has(i)) continue;
+                    const other = items[i];
+
+                    // Heuristic: If they involve the same System and the same Data, they are likely the same threat just reverse direction
+                    // Adjust this logic if needed based on specific threat types
+                    const sameSystem = item.system === other.system;
+                    // Some threats might not have 'system' but 'connection'
+                    const sameData = item.data === other.data; // assuming 'data' field exists in threat detail
+
+                    // Specific check for connection reversal if available
+                    // const connectionReversed = item.connection && other.connection && ...
+
+                    if (sameSystem && sameData) {
+                        // Found a duplicate candidate
+                        matchIndex = i;
+                        break;
+                    }
+                }
+
+                if (matchIndex !== -1) {
+                    // Merge
+                    merged.push({
+                        ...item,
+                        _mergedIndices: [index, matchIndex], // Keep track of original indices
+                        label: `${item.system} (Bidirectional)`
+                    });
+                    processedIndices.add(index);
+                    processedIndices.add(matchIndex);
+                } else {
+                    // No duplicate found
+                    merged.push({
+                        ...item,
+                        _mergedIndices: [index],
+                    });
+                    processedIndices.add(index);
+                }
+            });
+            return merged;
+        };
+
+
         return (
             <div className="space-y-4 p-1">
                 <div className="flex items-center gap-2 mb-2 bg-red-50 p-3 rounded-lg border border-red-100">
-                    <AlertTriangle className="text-red-600" size={20} />
                     <span className="font-bold text-red-700">{total_count} Violations Found</span>
                 </div>
                 {Object.entries(threats).map(([key, items]) => {
                     if (items.length === 0) return null;
+
+                    // --- Merging Logic ---
+                    const mergedItems = [];
+                    const processedIndices = new Set();
+
+                    items.forEach((item, index) => {
+                        if (processedIndices.has(index)) return;
+
+                        const group = {
+                            primary: item,
+                            indices: [index],
+                            allData: item.data ? [item.data] : []
+                        };
+
+                        // Look for duplicates in the rest of the list
+                        for (let i = index + 1; i < items.length; i++) {
+                            if (processedIndices.has(i)) continue;
+                            const other = items[i];
+
+                            // Check for identity: Same System/Connection AND Same Remediation
+                            const sameSystem = item.system === other.system;
+                            const sameConnection = item.connection === other.connection;
+                            const sameRemediation = item.remediation === other.remediation;
+
+                            // Match if Remediation matches AND (System or Connection matches)
+                            const isMatch = sameRemediation && (
+                                (item.system && sameSystem) ||
+                                (item.connection && sameConnection)
+                            );
+
+                            if (isMatch) {
+                                group.indices.push(i);
+                                if (other.data && !group.allData.includes(other.data)) {
+                                    group.allData.push(other.data);
+                                }
+                                processedIndices.add(i);
+                            }
+                        }
+
+                        mergedItems.push(group);
+                        processedIndices.add(index);
+                    });
+
+
                     return (
                         <div key={key} className="border border-red-100 rounded-xl overflow-hidden bg-white shadow-sm">
                             <div className="bg-red-50/50 px-3 py-2 border-b border-red-100 flex items-center gap-2">
@@ -656,35 +763,56 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                 </h4>
                             </div>
                             <div className="divide-y divide-gray-100">
-                                {items.map((item, idx) => {
-                                    const uniqueId = `${key}-${idx}`;
-                                    const isSelected = selectedThreatId === uniqueId;
+                                {mergedItems.map((group, idx) => {
+                                    const item = group.primary;
+                                    // Use a composite ID for selection dealing with merged items
+                                    const compositeId = `${key}-${group.indices.join(',')}`;
+                                    const isSelected = selectedThreatId === compositeId;
 
                                     return (
                                         <div
                                             key={idx}
                                             className={`p-3 transition-all duration-200 ease-in-out cursor-pointer active:scale-95 hover:bg-red-50/30 ${isSelected
-                                                ? 'bg-blue-50 border-l-4 border-blue-500'
+                                                ? 'bg-red-50 border-l-4 border-red-500'
                                                 : 'border-l-4 border-transparent'
                                                 }`}
-                                            onClick={() => onThreatClick && onThreatClick(uniqueId)}
+                                            onClick={() => onThreatClick && onThreatClick(compositeId)}
                                         >
                                             <div className="flex justify-between items-start mb-1">
-                                                <span className="font-semibold text-gray-700 text-xs">Violation #{idx + 1}</span>
+                                                <span className="font-semibold text-gray-700 text-xs">
+                                                    Violation #{idx + 1}
+                                                    {group.indices.length > 1 && " (Merged)"}
+                                                </span>
                                                 {isSelected && (
-                                                    <span className="text-blue-600 font-bold text-[10px] bg-blue-100 px-1.5 py-0.5 rounded-full">
+                                                    <span className="text-red-600 font-bold text-[10px] bg-red-100 px-1.5 py-0.5 rounded-full">
                                                         Selected
                                                     </span>
                                                 )}
                                             </div>
-                                            <ul className="space-y-1 mt-2">
-                                                {Object.entries(item).map(([k, v]) => (
-                                                    <li key={k} className="flex flex-col text-xs">
-                                                        <span className="font-medium text-gray-500 uppercase tracking-wider text-[10px]">{k}</span>
-                                                        <span className="text-gray-800 break-all">{v}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
+
+                                            {/* System or Connection Context */}
+                                            <div className="text-xs text-slate-500 mb-2 font-mono">
+                                                {item.system ? `System: ${item.system}` : `Connection: ${item.connection}`}
+                                            </div>
+
+                                            {/* Data List (Aggregated) */}
+                                            {group.allData && group.allData.length > 0 && (
+                                                <div className="mb-2">
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Involved Data</span>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {group.allData.map((dataId, dIdx) => (
+                                                            <span key={dIdx} className="bg-slate-100 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                                                                Data {dataId}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="text-xs text-slate-600 mt-1 bg-slate-50 p-2 rounded border border-slate-100 italic">
+                                                <span className="font-semibold text-slate-700 block mb-0.5 not-italic">Remediation:</span>
+                                                {item.remediation}
+                                            </div>
                                         </div>
                                     );
                                 })}
