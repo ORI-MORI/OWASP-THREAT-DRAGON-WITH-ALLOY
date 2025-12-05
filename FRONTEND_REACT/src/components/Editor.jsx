@@ -159,11 +159,12 @@ const EditorContent = ({ initialData, onExit }) => {
                 else defaultType = 'Terminal';
             }
 
+            const isZone = type === 'zone';
             const newNode = {
                 id: getId(),
                 type,
                 position,
-                zIndex, // Apply z-index
+                zIndex: isZone ? -1 : 10, // Zones at bottom (-1), Systems on top (10)
                 data: { label, grade: 'Open', type: defaultType },
             };
 
