@@ -422,7 +422,7 @@ const EditorContent = ({ initialData, onExit }) => {
                         </>
                     ) : (
                         <>
-                            <Play size={16} fill="currentColor" /> Analyze Threat Model
+                            <Play size={16} fill="currentColor" /> Analyze
                         </>
                     )}
                 </button>

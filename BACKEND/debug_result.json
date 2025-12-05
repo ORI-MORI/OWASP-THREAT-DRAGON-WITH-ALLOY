@@ -1,93 +1,16 @@
 {
   "threats": {
-    "FindStorageViolations": [
-      {
-        "system": "dndnode_1",
-        "data": "1",
-        "remediation": "시스템의 보안 등급을 상향하거나, 해당 데이터를 더 높은 등급의 시스템으로 이동하십시오."
-      },
-      {
-        "system": "dndnode_1",
-        "data": "2",
-        "remediation": "시스템의 보안 등급을 상향하거나, 해당 데이터를 더 높은 등급의 시스템으로 이동하십시오."
-      },
-      {
-        "system": "dndnode_1",
-        "data": "3",
-        "remediation": "시스템의 보안 등급을 상향하거나, 해당 데이터를 더 높은 등급의 시스템으로 이동하십시오."
-      },
-      {
-        "system": "dndnode_1",
-        "data": "4",
-        "remediation": "시스템의 보안 등급을 상향하거나, 해당 데이터를 더 높은 등급의 시스템으로 이동하십시오."
-      },
-      {
-        "system": "dndnode_1",
-        "data": "5",
-        "remediation": "시스템의 보안 등급을 상향하거나, 해당 데이터를 더 높은 등급의 시스템으로 이동하십시오."
-      }
-    ],
-    "FindFlowViolations": [
-      {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target",
-        "data": "1",
-        "remediation": "해당 경로에 CDS를 배치하거나, 출발지에 VDI/RBI 등 망분리 기술을 적용하십시오."
-      },
-      {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target",
-        "data": "2",
-        "remediation": "해당 경로에 CDS를 배치하거나, 출발지에 VDI/RBI 등 망분리 기술을 적용하십시오."
-      },
-      {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target",
-        "data": "3",
-        "remediation": "해당 경로에 CDS를 배치하거나, 출발지에 VDI/RBI 등 망분리 기술을 적용하십시오."
-      },
-      {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target",
-        "data": "4",
-        "remediation": "해당 경로에 CDS를 배치하거나, 출발지에 VDI/RBI 등 망분리 기술을 적용하십시오."
-      },
-      {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target",
-        "data": "5",
-        "remediation": "해당 경로에 CDS를 배치하거나, 출발지에 VDI/RBI 등 망분리 기술을 적용하십시오."
-      },
-      {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target_return",
-        "data": "1",
-        "remediation": "해당 경로에 CDS를 배치하거나, 출발지에 VDI/RBI 등 망분리 기술을 적용하십시오."
-      },
-      {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target_return",
-        "data": "2",
-        "remediation": "해당 경로에 CDS를 배치하거나, 출발지에 VDI/RBI 등 망분리 기술을 적용하십시오."
-      },
-      {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target_return",
-        "data": "3",
-        "remediation": "해당 경로에 CDS를 배치하거나, 출발지에 VDI/RBI 등 망분리 기술을 적용하십시오."
-      },
-      {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target_return",
-        "data": "4",
-        "remediation": "해당 경로에 CDS를 배치하거나, 출발지에 VDI/RBI 등 망분리 기술을 적용하십시오."
-      },
-      {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target_return",
-        "data": "5",
-        "remediation": "해당 경로에 CDS를 배치하거나, 출발지에 VDI/RBI 등 망분리 기술을 적용하십시오."
-      }
-    ],
+    "FindStorageViolations": [],
+    "FindFlowViolations": [],
     "FindLocationViolations": [],
     "FindBypassViolations": [],
     "FindUnencryptedChannels": [
       {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target",
+        "connection": "reactflow__edge_dndnode_0right_source_dndnode_1left_target",
         "remediation": "해당 구간의 통신 프로토콜을 암호화된 프로토콜(HTTPS, SSH, VPN 등)로 변경하십시오."
       },
       {
-        "connection": "reactflow__edge_dndnode_1right_source_dndnode_0left_target_return",
+        "connection": "reactflow__edge_dndnode_0right_source_dndnode_1left_target_return",
         "remediation": "해당 구간의 통신 프로토콜을 암호화된 프로토콜(HTTPS, SSH, VPN 등)로 변경하십시오."
       }
     ],
@@ -102,34 +25,8 @@
       }
     ],
     "FindContentControlFailures": [],
-    "FindUnencryptedStorage": [
-      {
-        "system": "dndnode_1",
-        "data": "1",
-        "remediation": "중요 데이터 저장 시 DB 암호화 또는 디스크 암호화(BitLocker 등)를 적용하십시오."
-      },
-      {
-        "system": "dndnode_1",
-        "data": "2",
-        "remediation": "중요 데이터 저장 시 DB 암호화 또는 디스크 암호화(BitLocker 등)를 적용하십시오."
-      },
-      {
-        "system": "dndnode_1",
-        "data": "3",
-        "remediation": "중요 데이터 저장 시 DB 암호화 또는 디스크 암호화(BitLocker 등)를 적용하십시오."
-      },
-      {
-        "system": "dndnode_1",
-        "data": "4",
-        "remediation": "중요 데이터 저장 시 DB 암호화 또는 디스크 암호화(BitLocker 등)를 적용하십시오."
-      },
-      {
-        "system": "dndnode_1",
-        "data": "5",
-        "remediation": "중요 데이터 저장 시 DB 암호화 또는 디스크 암호화(BitLocker 등)를 적용하십시오."
-      }
-    ],
+    "FindUnencryptedStorage": [],
     "FindAdminAccessViolation": []
   },
-  "total_count": 24
+  "total_count": 4
 }

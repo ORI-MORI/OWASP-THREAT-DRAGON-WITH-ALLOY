@@ -34,3 +34,18 @@ simulation_output.txt
 test_output.txt
 *.tmp
 *.bak
+
+# Debug Artifacts
+debug_*.xml
+debug_*.json
+server_debug.txt
+test_payload_debug.json
+debug_result.json
+debug_last_run.xml
+
+# Backend Alloy Artifacts
+BACKEND/alloy/user_instance_real.als
+BACKEND/alloy/user_instance_real.xml
+BACKEND/alloy/*.cnf
+BACKEND/alloy/*.tmp
+BACKEND/alloy/tmp*
