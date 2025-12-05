@@ -65,7 +65,11 @@ export default function DataFlowEdge({
     if (Array.isArray(carriesStr)) {
         carriedIds = carriesStr;
     } else if (typeof carriesStr === 'string' && carriesStr.trim() !== '') {
-        carriedIds = carriesStr.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+        carriedIds = carriesStr.split(',').map(x => {
+            const trimmed = x.trim();
+            const num = parseInt(trimmed);
+            return isNaN(num) ? trimmed : num; // Return number if it is one, else string
+        });
     }
 
     // Find carried data details from source node

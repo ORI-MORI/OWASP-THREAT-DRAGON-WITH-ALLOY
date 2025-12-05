@@ -1,0 +1,159 @@
+{
+  "meta": {
+    "title": "N2SF Model 1: Internet Terminal Usage",
+    "version": "1.0",
+    "description": "Standard model for secure internet usage via physically separated terminals.",
+    "author": "AMADEUS System"
+  },
+  "viewport": {
+    "x": 50,
+    "y": 50,
+    "zoom": 0.8
+  },
+  "data": [
+    {
+      "id": "data_public_info",
+      "grade": "Open",
+      "fileType": "Document",
+      "label": "Public Web Data"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "zone_internet",
+      "type": "zone",
+      "position": {
+        "x": 50,
+        "y": 50
+      },
+      "data": {
+        "label": "Internet Zone (External)",
+        "type": "Internet",
+        "grade": "Open"
+      },
+      "width": 500,
+      "height": 400,
+      "style": {
+        "width": 500,
+        "height": 400,
+        "backgroundColor": "rgba(230, 240, 255, 0.5)"
+      }
+    },
+    {
+      "id": "zone_intranet",
+      "type": "zone",
+      "position": {
+        "x": 600,
+        "y": 50
+      },
+      "data": {
+        "label": "Intranet Zone (Internal)",
+        "type": "Intranet",
+        "grade": "Sensitive"
+      },
+      "width": 400,
+      "height": 400,
+      "style": {
+        "width": 400,
+        "height": 400,
+        "backgroundColor": "rgba(255, 240, 230, 0.5)"
+      }
+    },
+    {
+      "id": "node_internet_pc",
+      "type": "system",
+      "position": {
+        "x": 100,
+        "y": 100
+      },
+      "data": {
+        "label": "Internet PC",
+        "type": "Terminal",
+        "grade": "Open",
+        "loc": "zone_internet",
+        "authType": "MFA",
+        "isolation": "None",
+        "isCDS": false,
+        "isRegistered": true,
+        "isStorageEncrypted": true,
+        "isManagement": false,
+        "hasMDM": false,
+        "stores": []
+      },
+      "parentNode": "zone_internet",
+      "extent": "parent",
+      "zIndex": 1
+    },
+    {
+      "id": "node_external_server",
+      "type": "system",
+      "position": {
+        "x": 300,
+        "y": 100
+      },
+      "data": {
+        "label": "External Web Service",
+        "type": "Server",
+        "grade": "Open",
+        "loc": "zone_internet",
+        "authType": "Single",
+        "isolation": "None",
+        "isCDS": false,
+        "isRegistered": false,
+        "isStorageEncrypted": true,
+        "isManagement": false,
+        "hasMDM": false,
+        "stores": [
+          "data_public_info"
+        ]
+      },
+      "parentNode": "zone_internet",
+      "extent": "parent",
+      "zIndex": 1
+    },
+    {
+      "id": "node_business_pc",
+      "type": "system",
+      "position": {
+        "x": 100,
+        "y": 100
+      },
+      "data": {
+        "label": "Business PC (Secure)",
+        "type": "Terminal",
+        "grade": "Sensitive",
+        "loc": "zone_intranet",
+        "authType": "MFA",
+        "isolation": "None",
+        "isCDS": false,
+        "isRegistered": true,
+        "isStorageEncrypted": true,
+        "isManagement": false,
+        "hasMDM": false,
+        "stores": []
+      },
+      "parentNode": "zone_intranet",
+      "extent": "parent",
+      "zIndex": 1
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_web_access",
+      "source": "node_internet_pc",
+      "target": "node_external_server",
+      "type": "smoothstep",
+      "data": {
+        "protocol": "HTTPS",
+        "isEncrypted": true,
+        "hasCDR": false,
+        "hasDLP": false,
+        "hasAntiVirus": true,
+        "carries": [
+          "data_public_info"
+        ]
+      },
+      "label": "HTTPS (Public Data)"
+    }
+  ]
+}

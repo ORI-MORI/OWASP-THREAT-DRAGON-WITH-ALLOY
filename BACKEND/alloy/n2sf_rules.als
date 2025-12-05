@@ -33,12 +33,15 @@ fun FindLocationViolations: System {
     { s: System | lt[s.loc.grade, s.grade] }
 }
 
-// 4. 우회 접속 (Boundary Bypass)
-// 규칙: 인터넷(외부) -> 내부망 직접 연결 시 CDS 미경유 위협
+// 4. 우회 접속 (Boundary Bypass) [수정됨]
+// 규칙: 인터넷뿐만 아니라 '클라우드', 'PPP' 구역에서 내부망으로 들어오는 것도 통제 대상임
 fun FindBypassViolations: Connection {
     { c: Connection |
-      c.from.loc.type = Internet
+      // 출발지가 외부 성격(인터넷 + 클라우드 + PPP)인 경우
+      (c.from.loc.type in (Internet + Cloud + PPP))
+      // 목적지가 내부망인 경우
       and c.to.loc.type = Intranet
+      // 연계체계(CDS)가 없으면 위협
       and c.to.isCDS = False
     }
 }
@@ -47,11 +50,16 @@ fun FindBypassViolations: Connection {
 // [Group B] 속성적 위협 탐지 (Attribute Threats)
 // ============================================================
 
-// 5. 암호화 미적용 (Unencrypted Channel)
-// 규칙: 인터넷/무선망 구간을 지나는 연결이 평문(ClearText)이거나 암호화 속성이 꺼져있음
+// 5. 암호화 미적용 (Unencrypted Channel) [수정됨]
+// 규칙: 인터넷, 무선뿐만 아니라 '클라우드', 'PPP' 구간도 암호화 필수
 fun FindUnencryptedChannels: Connection {
     { c: Connection |
-      (c.from.loc.type in (Internet + Wireless) or c.to.loc.type in (Internet + Wireless))
+      // 경로 중 하나라도 위험 구역(인터넷/무선/클라우드/PPP)에 걸치면 검사
+      (
+        c.from.loc.type in (Internet + Wireless + Cloud + PPP) or 
+        c.to.loc.type in (Internet + Wireless + Cloud + PPP)
+      )
+      // 평문(ClearText)이거나 암호화 속성이 꺼져있으면(False) 위협
       and (c.protocol = ClearText or c.isEncrypted = False)
     }
 }

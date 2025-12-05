@@ -528,8 +528,8 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
                                 const currentCarries = (formData.carries || '')
                                     .toString()
                                     .split(',')
-                                    .map(x => parseInt(x.trim()))
-                                    .filter(x => !isNaN(x));
+                                    .map(x => x.trim())
+                                    .filter(x => x !== '');
 
                                 const handleAddData = () => {
                                     if (availableData.length === 0) return;
@@ -545,7 +545,7 @@ export default function PropertyPanel({ analysisResult, onThreatClick, selectedT
 
                                 const handleUpdateData = (indexToUpdate, newValue) => {
                                     const newCarries = [...currentCarries];
-                                    newCarries[indexToUpdate] = parseInt(newValue);
+                                    newCarries[indexToUpdate] = newValue;
                                     handleChange('carries', newCarries.join(', '));
                                 };
 
