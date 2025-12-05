@@ -101,7 +101,7 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
         <div className="absolute top-4 left-4 z-20 flex flex-col gap-3">
             {/* Security Score Card */}
             <div
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 cursor-help glass-panel hover:shadow-lg ${getScoreBg(displayedSecurityScore)}`}
+                className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 cursor-help glass-panel hover:shadow-lg ${getScoreBg(displayedSecurityScore)}`}
                 onMouseEnter={() => setHoveredMetric('security')}
                 onMouseLeave={() => setHoveredMetric(null)}
             >
@@ -109,10 +109,10 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
                     <Shield size={20} strokeWidth={2.5} className={isAnalyzing ? 'animate-pulse' : ''} />
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">보안 건전성</span>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Security Health</span>
                     <span className={`text-2xl font-black leading-none ${getScoreColor(displayedSecurityScore)}`}>
                         {isAnalyzing ? (
-                            <span className="text-lg animate-pulse">분석중...</span>
+                            <span className="text-lg animate-pulse">Analyzing...</span>
                         ) : displayedSecurityScore === null ? (
                             <span className="text-lg text-gray-400">-</span>
                         ) : (
@@ -121,20 +121,18 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
                     </span>
                 </div>
 
-                {/* Tooltip */}
+                {/* Tooltip - Moved to Right */}
                 {hoveredMetric === 'security' && (
-                    <div className="absolute left-0 top-full mt-2 w-72 p-4 glass-panel bg-gray-900/95 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none animate-in fade-in slide-in-from-top-2 backdrop-blur-xl border-gray-700/50">
-                        <div className="font-bold mb-2 text-sm flex items-center gap-2 text-indigo-300">
-                            <Shield size={16} /> 보안 건전성 (Security Health)
+                    <div className="absolute left-full top-0 ml-3 w-64 p-3 glass-panel bg-gray-900/95 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none animate-in fade-in slide-in-from-left-2 backdrop-blur-xl border-gray-700/50">
+                        <div className="font-bold mb-1 text-sm flex items-center gap-2 text-indigo-300">
+                            <Shield size={14} /> Security Health
                         </div>
                         <p className="leading-relaxed text-gray-300">
-                            망 구성의 보안 안전성을 퍼센트로 나타냅니다.
+                            Indicates the security safety of the network configuration.
                             <br />
-                            • <span className="text-gray-400">분석 전</span>: '-'로 표시됩니다.
+                            • <span className="text-green-400">100%</span>: No threats found.
                             <br />
-                            • <span className="text-green-400">100%</span>: 발견된 위협이 없습니다.
-                            <br />
-                            • <span className="text-red-400">감소</span>: 위협이 많을수록 점수가 기하급수적으로 낮아집니다. (절대 음수가 되지 않음)
+                            • <span className="text-red-400">Lower</span>: Score decreases as threats increase.
                         </p>
                     </div>
                 )}
@@ -142,7 +140,7 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
 
             {/* Completeness Card */}
             <div
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 cursor-help glass-panel hover:shadow-lg ${getCompletenessBg(completenessData.ratio)}`}
+                className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 cursor-help glass-panel hover:shadow-lg ${getCompletenessBg(completenessData.ratio)}`}
                 onMouseEnter={() => setHoveredMetric('completeness')}
                 onMouseLeave={() => setHoveredMetric(null)}
             >
@@ -150,24 +148,24 @@ const ScoreDashboard = ({ nodes, edges, analysisResult, isAnalyzing }) => {
                     <CheckCircle size={20} strokeWidth={2.5} />
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">모델링 완성도</span>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Modeling Completeness</span>
                     <span className={`text-2xl font-black leading-none ${getCompletenessColor(completenessData.ratio)}`}>
                         {completenessData.text}
                     </span>
                 </div>
 
-                {/* Tooltip */}
+                {/* Tooltip - Moved to Right */}
                 {hoveredMetric === 'completeness' && (
-                    <div className="absolute left-0 top-full mt-2 w-72 p-4 glass-panel bg-gray-900/95 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none animate-in fade-in slide-in-from-top-2 backdrop-blur-xl border-gray-700/50">
-                        <div className="font-bold mb-2 text-sm flex items-center gap-2 text-emerald-300">
-                            <CheckCircle size={16} /> 모델링 완성도 (Completeness)
+                    <div className="absolute left-full top-0 ml-3 w-64 p-3 glass-panel bg-gray-900/95 text-white text-xs rounded-xl shadow-2xl z-50 pointer-events-none animate-in fade-in slide-in-from-left-2 backdrop-blur-xl border-gray-700/50">
+                        <div className="font-bold mb-1 text-sm flex items-center gap-2 text-emerald-300">
+                            <CheckCircle size={14} /> Completeness
                         </div>
                         <p className="leading-relaxed text-gray-300">
-                            전체 노드 중 연결된 노드의 비율을 나타냅니다.
+                            Ratio of connected nodes to total nodes.
                             <br />
-                            • <span className="text-blue-300">표시</span>: (연결된 노드 수) / (전체 노드 수)
+                            • <span className="text-blue-300">Goal</span>: Connect all nodes.
                             <br />
-                            • <span className="text-yellow-400">미연결 노드</span>가 없도록 모든 노드를 연결하여 비율을 높이세요.
+                            • <span className="text-yellow-400">Tip</span>: Ensure no isolated systems exist.
                         </p>
                     </div>
                 )}
